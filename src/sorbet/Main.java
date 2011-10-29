@@ -11,6 +11,7 @@ import com.sun.jdi.connect.Connector;
 import com.sun.jdi.connect.IllegalConnectorArgumentsException;
 import com.sun.jdi.connect.LaunchingConnector;
 import com.sun.jdi.connect.VMStartException;
+import com.sun.xml.internal.bind.v2.util.EditDistance;
 
 public class Main {	
 	public static void main(String args[]) {		
@@ -21,17 +22,28 @@ public class Main {
 		InputStream errorStream = vm.process().getErrorStream();
 		InputStream outputStream = vm.process().getInputStream();
 		
-		while (true) {
-			int error = errorStream.read();
-			if (error != -1) {
-				System.out.print((char)error);
-			}
-			
-			int output = outputStream.read();
-			if (output != -1) {
-				System.out.print((char)output);
+		try {
+			while (true) {
+				int error = errorStream.read();
+				if (error != -1) {
+					System.out.print((char)error);
+				}
+				
+				int output = outputStream.read();
+				if (output != -1) {
+					System.out.print((char)output);
+				}		
+				
+				if (error == -1 && output == -1) {
+					break;
+				}
 			}
 		}
+		catch (IOException e) {
+			System.out.println("Error: IOException: " + e.getMessage());
+		}		
+		
+		vm.exit(0);
 	}	
 	
 	private static VirtualMachine launchVirtualMachine(String mainArg) {
