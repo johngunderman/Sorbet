@@ -25,11 +25,13 @@ public class Main {
 		try {
 			VirtualMachine vm = connector.launch(arguments);
 			
+			vm.setDebugTraceMode(VirtualMachine.TRACE_ALL);
+			
 			vm.resume();
 			
 			InputStream errorStream = vm.process().getErrorStream();
 			InputStream outputStream = vm.process().getInputStream();
-			
+						
 			while (true) {
 				int error = errorStream.read();
 				if (error != -1) {
@@ -39,8 +41,10 @@ public class Main {
 				int output = outputStream.read();
 				if (output != -1) {
 					System.out.print((char)output);
-				}
+				} else break;
 			}
+			
+			vm.exit(0);
 		}
 		catch(IllegalConnectorArgumentsException e)	{
 			for (String argName : e.argumentNames()) {
