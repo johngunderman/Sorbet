@@ -19,31 +19,23 @@ public class Main {
 		
 		vm.resume();
 			
-		InputStream errorStream = vm.process().getErrorStream();
-		InputStream outputStream = vm.process().getInputStream();
+		//InputStream errorStream = vm.process().getErrorStream();
+		//InputStream outputStream = vm.process().getInputStream();
 		
-		try {
-			while (true) {
-				int error = errorStream.read();
-				if (error != -1) {
-					System.out.print((char)error);
-				}
-				
-				int output = outputStream.read();
-				if (output != -1) {
-					System.out.print((char)output);
-				}		
-				
-				if (error == -1 && output == -1) {
-					break;
-				}
-			}
-		}
-		catch (IOException e) {
-			System.out.println("Error: IOException: " + e.getMessage());
-		}		
+		StreamTunnel errorStreamTunnel = new StreamTunnel(vm.process().getErrorStream(), System.err);
+		StreamTunnel outputStreamTunnel = new StreamTunnel(vm.process().getInputStream(), System.out);
 		
-		vm.exit(0);
+		Thread errorStreamThread = new Thread(errorStreamTunnel);
+		Thread outputStreamThread = new Thread(outputStreamTunnel);
+		
+		errorStreamThread.start();
+		outputStreamThread.start();
+		
+		while (true) {
+			
+		}	
+		
+		//vm.exit(0);
 	}	
 	
 	private static VirtualMachine launchVirtualMachine(String mainArg) {
