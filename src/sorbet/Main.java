@@ -8,8 +8,11 @@ import java.util.Map;
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.Bootstrap;
 import com.sun.jdi.Field;
+import com.sun.jdi.IncompatibleThreadStateException;
+import com.sun.jdi.LocalVariable;
 import com.sun.jdi.Location;
 import com.sun.jdi.ReferenceType;
+import com.sun.jdi.StackFrame;
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.VirtualMachineManager;
@@ -106,6 +109,26 @@ public class Main {
 						} catch (AbsentInformationException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
+						}
+						
+						for (ThreadReference ref : vm.allThreads()) {
+							if (ref.name().equals("main")) {
+								try {
+									StackFrame frame = ref.frame(0);
+									
+									try {
+										for (LocalVariable var : frame.visibleVariables()) {
+											System.out.println(var.name() + " : " + frame.getValue(var).type());
+										}
+									} catch (AbsentInformationException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								} catch (IncompatibleThreadStateException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
 						}
 					}
 				}

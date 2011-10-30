@@ -8,6 +8,8 @@ public class Main {
 		 
 		foo = 3;
 		
+		int i = 6;
+		
 		foo = 5;
 		
 		System.out.println("Client program");
