@@ -14,6 +14,7 @@ import com.sun.jdi.connect.Connector;
 import com.sun.jdi.connect.IllegalConnectorArgumentsException;
 import com.sun.jdi.connect.LaunchingConnector;
 import com.sun.jdi.connect.VMStartException;
+import com.sun.jdi.event.ClassPrepareEvent;
 import com.sun.jdi.event.Event;
 import com.sun.jdi.event.EventQueue;
 import com.sun.jdi.event.EventSet;
@@ -29,14 +30,15 @@ import com.sun.xml.internal.bind.v2.util.EditDistance;
 public class Main {	
 
 	public static final String FIELD_NAME = "foo";
-	public static final String CLASS_NAME = "sMain";
+	public static final String CLASS_NAME = "client.Main";
 	
 	public static void main(String args[]) {		
-		VirtualMachine vm = launchVirtualMachine("client.Main");
+		VirtualMachine vm = launchVirtualMachine(CLASS_NAME);
 	
 		List<ReferenceType> referenceTypes = vm.classesByName(CLASS_NAME);
 		for (ReferenceType refType : referenceTypes) {
-			addFieldWatch(vm, refType);
+			System.out.println(refType);
+			//addFieldWatch(vm, refType);
 		}
 		
 		
@@ -45,10 +47,7 @@ public class Main {
 				.createClassPrepareRequest();
 		classPrepareRequest.addClassFilter(CLASS_NAME);
 		classPrepareRequest.setEnabled(true);
-		
-		
-		vm.resume();
-			
+					
 		//InputStream errorStream = vm.process().getErrorStream();
 		//InputStream outputStream = vm.process().getInputStream();
 		
@@ -62,6 +61,8 @@ public class Main {
 		outputStreamThread.start();
 		
 		
+		vm.resume();
+		
 	    EventQueue eventQueue = vm.eventQueue();
 
 		while (true) {
@@ -73,6 +74,11 @@ public class Main {
 							|| event instanceof VMDisconnectEvent) {
 						// exit
 						return;
+					} else if (event instanceof ClassPrepareEvent) {
+						// watch field on loaded class
+						ClassPrepareEvent classPrepEvent = (ClassPrepareEvent) event;
+						ReferenceType refType = classPrepEvent.referenceType();
+						addFieldWatch(vm, refType);
 					} else if (event instanceof ModificationWatchpointEvent) {
 						// a Test.foo has changed
 						ModificationWatchpointEvent modEvent = (ModificationWatchpointEvent) event;
