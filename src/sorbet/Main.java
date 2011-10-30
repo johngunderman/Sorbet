@@ -5,9 +5,12 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
+import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.Bootstrap;
 import com.sun.jdi.Field;
+import com.sun.jdi.Location;
 import com.sun.jdi.ReferenceType;
+import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.VirtualMachineManager;
 import com.sun.jdi.connect.Connector;
@@ -19,11 +22,14 @@ import com.sun.jdi.event.Event;
 import com.sun.jdi.event.EventQueue;
 import com.sun.jdi.event.EventSet;
 import com.sun.jdi.event.ModificationWatchpointEvent;
+import com.sun.jdi.event.StepEvent;
 import com.sun.jdi.event.VMDeathEvent;
 import com.sun.jdi.event.VMDisconnectEvent;
 import com.sun.jdi.request.ClassPrepareRequest;
+import com.sun.jdi.request.EventRequest;
 import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.ModificationWatchpointRequest;
+import com.sun.jdi.request.StepRequest;
 import com.sun.xml.internal.bind.v2.util.EditDistance;
 
 
@@ -60,6 +66,13 @@ public class Main {
 		errorStreamThread.start();
 		outputStreamThread.start();
 		
+		for (ThreadReference ref : vm.allThreads()) {
+			if (ref.name().equals("main")) {
+				StepRequest request = erm.createStepRequest(ref, StepRequest.STEP_LINE, StepRequest.STEP_INTO);
+				request.addClassFilter("client.Main");
+				request.enable();
+			}
+		}
 		
 		vm.resume();
 		
@@ -85,6 +98,15 @@ public class Main {
 						System.out.println("old=" + modEvent.valueCurrent());
 						System.out.println("new=" + modEvent.valueToBe());
 						System.out.println();
+					}
+					else if (event instanceof StepEvent) {
+						Location loc = ((StepEvent)event).location();
+						try {
+							System.out.println("step: " + loc.sourceName() + "." + loc.lineNumber());
+						} catch (AbsentInformationException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				}
 				eventSet.resume();
