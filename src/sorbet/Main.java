@@ -81,7 +81,8 @@ public class Main {
 						
 						Location location = stepEvent.location();
 						try {
-							System.out.println("Step: " + location.sourceName() + ":" + location.lineNumber());
+							System.out.println("Step: " + location.sourcePath() + ":" + location.lineNumber() + " (" 
+									+ location.method() + ")");
 							
 							for (ThreadReference thread : vm.allThreads()) {								
 								System.out.println("\tThread: " + thread.name());
