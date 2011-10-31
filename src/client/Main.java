@@ -8,10 +8,21 @@ public class Main {
 		 
 		foo = 3;
 		
-		int i = 6;
+		
+		
+		String i = "hi!";
+		int j = 0;
+		
+		bar();
 		
 		foo = 5;
 		
 		System.out.println("Client program");
+	}
+	
+	public static void bar() {
+		int i = 2;
+		
+		int j = 6;
 	}
 }

@@ -6,36 +6,47 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
-public class StreamTunnel implements Runnable {
-	private InputStreamReader in;
-	private OutputStreamWriter out;
+public class StreamTunnel {
+	private StreamTunnelRunnable tunnel;
+	private Thread thread;
 	
 	public StreamTunnel(InputStream in, OutputStream out) {
-		this.in = new InputStreamReader(in);
-		this.out = new OutputStreamWriter(out);
-	}
-
-	@Override
-	public void run() {
-		try {
-			int readItem = in.read();
-			
-			while (readItem != -1) {
-				out.write(readItem);
-				
-				readItem = in.read();
-			}
-		}
-		catch (IOException e) {
-			System.out.println("Error: Could not read/write stream: " + e.getMessage());
-		}
+		tunnel = new StreamTunnelRunnable(in, out);
 		
-		try {
-			in.close();
-			out.close();
+		thread = new Thread(tunnel);
+		thread.start();
+	}
+	
+	private class StreamTunnelRunnable implements Runnable {
+		private InputStreamReader in;
+		private OutputStreamWriter out;
+		
+		public StreamTunnelRunnable(InputStream in, OutputStream out) {
+			this.in = new InputStreamReader(in);
+			this.out = new OutputStreamWriter(out);
 		}
-		catch (IOException e) {
-			System.out.println("Error: Could not close stream: " + e.getMessage());
+
+		public void run() {
+			try {
+				int readItem = in.read();
+				
+				while (readItem != -1) {
+					out.write(readItem);
+					
+					readItem = in.read();
+				}
+			}
+			catch (IOException e) {
+				System.out.println("Error: Could not read/write stream: " + e.getMessage());
+			}
+			
+			try {
+				in.close();
+				out.close();
+			}
+			catch (IOException e) {
+				System.out.println("Error: Could not close stream: " + e.getMessage());
+			}
 		}
 	}
 }

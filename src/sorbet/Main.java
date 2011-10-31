@@ -1,7 +1,6 @@
 package sorbet;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -29,12 +28,9 @@ import com.sun.jdi.event.StepEvent;
 import com.sun.jdi.event.VMDeathEvent;
 import com.sun.jdi.event.VMDisconnectEvent;
 import com.sun.jdi.request.ClassPrepareRequest;
-import com.sun.jdi.request.EventRequest;
 import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.ModificationWatchpointRequest;
 import com.sun.jdi.request.StepRequest;
-import com.sun.xml.internal.bind.v2.util.EditDistance;
-
 
 public class Main {	
 
@@ -42,39 +38,17 @@ public class Main {
 	public static final String CLASS_NAME = "client.Main";
 	
 	public static void main(String args[]) {		
-		VirtualMachine vm = launchVirtualMachine(CLASS_NAME);
-	
-		List<ReferenceType> referenceTypes = vm.classesByName(CLASS_NAME);
-		for (ReferenceType refType : referenceTypes) {
-			System.out.println(refType);
-			//addFieldWatch(vm, refType);
-		}
-		
+		VirtualMachine vm = launchVirtualMachine(CLASS_NAME);		
 		
 		EventRequestManager erm = vm.eventRequestManager();
-		ClassPrepareRequest classPrepareRequest = erm
-				.createClassPrepareRequest();
+		ClassPrepareRequest classPrepareRequest = erm.createClassPrepareRequest();
 		classPrepareRequest.addClassFilter(CLASS_NAME);
-		classPrepareRequest.setEnabled(true);
-					
-		//InputStream errorStream = vm.process().getErrorStream();
-		//InputStream outputStream = vm.process().getInputStream();
-		
-		StreamTunnel errorStreamTunnel = new StreamTunnel(vm.process().getErrorStream(), System.err);
-		StreamTunnel outputStreamTunnel = new StreamTunnel(vm.process().getInputStream(), System.out);
-		
-		Thread errorStreamThread = new Thread(errorStreamTunnel);
-		Thread outputStreamThread = new Thread(outputStreamTunnel);
-		
-		errorStreamThread.start();
-		outputStreamThread.start();
+		classPrepareRequest.enable();
 		
 		for (ThreadReference ref : vm.allThreads()) {
-			if (ref.name().equals("main")) {
-				StepRequest request = erm.createStepRequest(ref, StepRequest.STEP_LINE, StepRequest.STEP_INTO);
-				request.addClassFilter("client.Main");
-				request.enable();
-			}
+			StepRequest request = erm.createStepRequest(ref, StepRequest.STEP_LINE, StepRequest.STEP_INTO);
+			request.addClassFilter(CLASS_NAME);
+			request.enable();
 		}
 		
 		vm.resume();
@@ -103,33 +77,49 @@ public class Main {
 						System.out.println();
 					}
 					else if (event instanceof StepEvent) {
-						Location loc = ((StepEvent)event).location();
-						try {
-							System.out.println("step: " + loc.sourceName() + "." + loc.lineNumber());
-						} catch (AbsentInformationException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+						StepEvent stepEvent = (StepEvent)event;
 						
-						for (ThreadReference ref : vm.allThreads()) {
-							if (ref.name().equals("main")) {
+						Location location = stepEvent.location();
+						try {
+							System.out.println("Step: " + location.sourceName() + ":" + location.lineNumber());
+							
+							for (ThreadReference thread : vm.allThreads()) {								
+								System.out.println("\tThread: " + thread.name());
+								
 								try {
-									StackFrame frame = ref.frame(0);
-									
-									try {
-										for (LocalVariable var : frame.visibleVariables()) {
-											System.out.println(var.name() + " : " + frame.getValue(var).type());
-										}
-									} catch (AbsentInformationException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
+									if (thread.frameCount() > 0) {
+										try {
+											StackFrame frame = thread.frame(0);
+											
+											try {
+												for (LocalVariable var : frame.visibleVariables()) {
+													System.out.println("\t\t" + var.name() + " = " + frame.getValue(var));
+												}
+											} 
+											catch (AbsentInformationException e) {
+												System.out.println("\t\tNo stack variables available for this thread");
+											} 
+										} 
+										catch (IncompatibleThreadStateException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										} 
+										catch (IndexOutOfBoundsException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}	
 									}
 								} catch (IncompatibleThreadStateException e) {
 									// TODO Auto-generated catch block
-									e.printStackTrace();
+									System.out.println("\t\tNo stack variables available for this thread");
 								}
 							}
-						}
+						} 
+						catch (AbsentInformationException e) {
+							// TODO Auto-generated catch block
+							//e.printStackTrace();
+							System.out.println("No location information available for this step");
+						}		
 					}
 				}
 				eventSet.resume();
@@ -153,6 +143,10 @@ public class Main {
 		
 		try {
 			VirtualMachine vm = connector.launch(arguments);
+			
+			// Forward standard out and standard error
+			StreamTunnel outputStreamTunnel = new StreamTunnel(vm.process().getInputStream(), System.out);
+			StreamTunnel errorStreamTunnel = new StreamTunnel(vm.process().getErrorStream(), System.err);
 			
 			return vm;
 		}
