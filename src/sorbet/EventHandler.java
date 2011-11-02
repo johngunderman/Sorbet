@@ -83,6 +83,13 @@ public class EventHandler {
 	private static void handleModificationWatchPointEvent(VirtualMachine vm, ModificationWatchpointEvent event) {
 		// a Test.foo has changed
 		ModificationWatchpointEvent modEvent = (ModificationWatchpointEvent)event;
+		try {
+			System.out.println("file: " + modEvent.location().sourceName());
+		} catch (AbsentInformationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("line: " + modEvent.location().lineNumber());
 		System.out.println("name: " + modEvent.field().name());
 		System.out.println("old=" + modEvent.valueCurrent());
 		System.out.println("new=" + modEvent.valueToBe());
