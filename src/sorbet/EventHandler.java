@@ -86,7 +86,7 @@ public class EventHandler {
 		ModificationWatchpointEvent modEvent = (ModificationWatchpointEvent)event;
 		
 		try {
-			logger.log(modEvent.location().sourceName(), modEvent.location().lineNumber(),
+			logger.log(modEvent.location().sourcePath(), modEvent.location().lineNumber(), modEvent.location().method().name(), 
 						modEvent.field().name(), modEvent.valueToBe());
 		} catch (AbsentInformationException e) {
 			// TODO Auto-generated catch block
@@ -100,20 +100,28 @@ public class EventHandler {
 	private static void handleStepEvent(VirtualMachine vm, StepEvent event) {		
 		Location location = event.location();
 		
+		String sourcePath;
+		int lineNumber;
+		String methodName; 
+		
 		try {
-			System.out.println("Step: " + location.sourcePath() + ":" + location.lineNumber() + " (" 
-				+ location.method() + ")");
+			sourcePath = location.sourcePath();
+			lineNumber = location.lineNumber();
+			methodName = location.method().name();
 		} catch (AbsentInformationException e) {
-			System.out.println("No location information available for this step");
+			// No location information available for this step
+			
+			return;
 		}
 			
 		for (ThreadReference thread : vm.allThreads()) {	
 			String threadName = thread.name();
 			
-			System.out.println("\tThread: " + threadName);
-			
 			if (threads.containsKey(threadName) == false) {
-				threads.put(threadName, new VariablesStack());
+				VariablesStack variablesStack = new VariablesStack();
+				variablesStack.setLineNumber(lineNumber);
+				
+				threads.put(threadName, variablesStack);
 			}
 			
 			int frameCount;
@@ -121,7 +129,7 @@ public class EventHandler {
 			try {
 				frameCount = thread.frameCount();
 			} catch (IncompatibleThreadStateException e) {
-				System.out.println("\t\tNo stack variables available for this thread");
+				// No stack variables available for this thread
 				
 				continue;
 			}
@@ -129,10 +137,12 @@ public class EventHandler {
 			VariablesStack variablesStack = threads.get(threadName);
 			
 			if (variablesStack.size() < frameCount) {
-				// Push a new VariablesMap
+				// Stack has grown so make a new VariablesMap
+				
 				variablesStack.push(new VariablesMap());
 			} else if (variablesStack.size() > frameCount) {
-				// Pop off a VariablesMap
+				// Stack has shrunk so pop a VariablesMap
+				
 				variablesStack.pop();
 			}
 			
@@ -142,34 +152,40 @@ public class EventHandler {
 				try {
 					StackFrame frame = thread.frame(0);
 					
-					try {
-						for (LocalVariable variable : frame.visibleVariables()) {
-							if (variablesMap.containsKey(variable.name())) {
-								// Variable already existed
+					for (LocalVariable variable : frame.visibleVariables()) {
+						if (variablesMap.containsKey(variable.name())) {
+							// Variable already existed
+							
+							Value oldValue = variablesMap.get(variable.name());
+							Value newValue = frame.getValue(variable);
+							
+							// TODO: I think that this equals needs to be refined
+							if (oldValue.equals(newValue) == false) {
+								variablesMap.put(variable.name(), newValue);
 								
-								Value oldValue = variablesMap.get(variable.name());
-								Value newValue = frame.getValue(variable);
-								
-								// TODO: I think that this equals needs to be refined
-								if (oldValue.equals(newValue) == false) {
-									variablesMap.put(variable.name(), newValue);
-									
-									System.out.println("\t\t" + variable.name() + " = " + newValue + " (updated from " + oldValue + ")");
-								}
-							} else {
-								// Variable was just declared
-								
-								variablesMap.put(variable.name(), frame.getValue(variable));
-								
-								System.out.println("\t\t" + variable.name() + " = " + frame.getValue(variable) + " (declared)");
+								logger.log(sourcePath, variablesStack.getLineNumber(), methodName, variable.name(), newValue);
 							}
+						} else {
+							// Variable was just declared
+							
+							Value newValue = frame.getValue(variable);
+							
+							variablesMap.put(variable.name(), newValue);
+							
+							logger.log(sourcePath, variablesStack.getLineNumber(), methodName, variable.name(), newValue);
 						}
-					} catch (AbsentInformationException e) {
-						System.out.println("\t\tNo stack variables available for this thread");
-					} 
+					}
+					
+					variablesStack.setLineNumber(lineNumber);
 				} catch (IncompatibleThreadStateException e) {
-					System.out.println("\t\tNo stack variables available for this thread");
-				}
+					// No stack variables available for this thread
+					
+					continue;
+				} catch (AbsentInformationException e) {
+					// No stack variables available for this thread
+					
+					continue;
+				} 
 			}
 		}
 	}
