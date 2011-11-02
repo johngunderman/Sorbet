@@ -1,5 +1,9 @@
 package sorbet;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
+
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.Field;
 import com.sun.jdi.IncompatibleThreadStateException;
@@ -8,6 +12,7 @@ import com.sun.jdi.Location;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.StackFrame;
 import com.sun.jdi.ThreadReference;
+import com.sun.jdi.Value;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.event.ClassPrepareEvent;
 import com.sun.jdi.event.Event;
@@ -20,11 +25,11 @@ import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.ModificationWatchpointRequest;
 import com.sun.jdi.request.StepRequest;
 
-public class EventHandler {	
+public abstract class EventHandler {	
 	public static final String FIELD_NAME = "foo";
 	public static final String CLASS_NAME = "client.Main";	
 	
-	public static void requestEvents(VirtualMachine vm) {
+	public static void request(VirtualMachine vm) {
 		EventRequestManager erm = vm.eventRequestManager();
 		ClassPrepareRequest classPrepareRequest = erm.createClassPrepareRequest();
 		classPrepareRequest.addClassFilter(CLASS_NAME);
@@ -45,9 +50,7 @@ public class EventHandler {
 	 *   -1 stop debug loop on return
 	 *    0 ignore
 	 */
-	public static int eventHandler(VirtualMachine vm, Event event) {
-		// TODO Auto-generated method stub
-		
+	public static int handle(VirtualMachine vm, Event event) {		
 		if (event instanceof VMDeathEvent || event instanceof VMDisconnectEvent) {
 			// exit
 			return -1;
@@ -85,35 +88,82 @@ public class EventHandler {
 		System.out.println();
 	}
 	
-	private static void handleStepEvent(VirtualMachine vm, StepEvent event) {
+	private static ThreadsMap threads = new ThreadsMap();
+	
+	private static void handleStepEvent(VirtualMachine vm, StepEvent event) {		
 		Location location = event.location();
+		
 		try {
 			System.out.println("Step: " + location.sourcePath() + ":" + location.lineNumber() + " (" 
-					+ location.method() + ")");
+				+ location.method() + ")");
+		} catch (AbsentInformationException e) {
+			System.out.println("No location information available for this step");
+		}
 			
-			for (ThreadReference thread : vm.allThreads()) {								
-				System.out.println("\tThread: " + thread.name());
+		for (ThreadReference thread : vm.allThreads()) {	
+			String threadName = thread.name();
+			
+			System.out.println("\tThread: " + threadName);
+			
+			if (threads.containsKey(threadName) == false) {
+				threads.put(threadName, new VariablesStack());
+			}
+			
+			int frameCount;
+			
+			try {
+				frameCount = thread.frameCount();
+			} catch (IncompatibleThreadStateException e) {
+				System.out.println("\t\tNo stack variables available for this thread");
+				
+				continue;
+			}
+			
+			VariablesStack variablesStack = threads.get(threadName);
+			
+			if (variablesStack.size() < frameCount) {
+				// Push a new VariablesMap
+				variablesStack.push(new VariablesMap());
+			} else if (variablesStack.size() > frameCount) {
+				// Pop off a VariablesMap
+				variablesStack.pop();
+			}
+			
+			if (frameCount > 0) {				
+				VariablesMap variablesMap = variablesStack.peek();
 				
 				try {
-					if (thread.frameCount() > 0) {
-						StackFrame frame = thread.frame(0);
-						
-						try {
-							for (LocalVariable var : frame.visibleVariables()) {
-								System.out.println("\t\t" + var.name() + " = " + frame.getValue(var));
+					StackFrame frame = thread.frame(0);
+					
+					try {
+						for (LocalVariable variable : frame.visibleVariables()) {
+							if (variablesMap.containsKey(variable.name())) {
+								// Variable already existed
+								
+								Value oldValue = variablesMap.get(variable.name());
+								Value newValue = frame.getValue(variable);
+								
+								// TODO: I think that this equals needs to be refined
+								if (oldValue.equals(newValue) == false) {
+									variablesMap.put(variable.name(), newValue);
+									
+									System.out.println("\t\t" + variable.name() + " = " + newValue + " (updated from " + oldValue + ")");
+								}
+							} else {
+								// Variable was just declared
+								
+								variablesMap.put(variable.name(), frame.getValue(variable));
+								
+								System.out.println("\t\t" + variable.name() + " = " + frame.getValue(variable) + " (declared)");
 							}
-						} catch (AbsentInformationException e) {
-							System.out.println("\t\tNo stack variables available for this thread");
-						} 
-					}
+						}
+					} catch (AbsentInformationException e) {
+						System.out.println("\t\tNo stack variables available for this thread");
+					} 
 				} catch (IncompatibleThreadStateException e) {
 					System.out.println("\t\tNo stack variables available for this thread");
 				}
 			}
-		} catch (AbsentInformationException e) {
-			System.out.println("No location information available for this step");
-		} catch (IndexOutOfBoundsException e) {
-			e.printStackTrace();
-		}	
+		}
 	}
 }

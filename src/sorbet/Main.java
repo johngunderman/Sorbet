@@ -17,7 +17,7 @@ public class Main {
 	public static void main(String args[]) {		
 		VirtualMachine vm = launchVirtualMachine(EventHandler.CLASS_NAME);		
 		
-		EventHandler.requestEvents(vm);
+		EventHandler.request(vm);
 		
 		debugLoop(vm);
 	}		
@@ -61,7 +61,7 @@ public class Main {
 			try {
 				EventSet eventSet = vm.eventQueue().remove();
 				for (Event event : eventSet) {
-					if (EventHandler.eventHandler(vm,event) == -1) {
+					if (EventHandler.handle(vm,event) == -1) {
 						return;
 					}
 					
