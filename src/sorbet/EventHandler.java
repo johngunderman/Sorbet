@@ -1,9 +1,6 @@
 package sorbet;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
-
+import java.util.List;
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.Field;
 import com.sun.jdi.IncompatibleThreadStateException;
@@ -24,12 +21,14 @@ import com.sun.jdi.request.ClassPrepareRequest;
 import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.ModificationWatchpointRequest;
 import com.sun.jdi.request.StepRequest;
+import log.*;
 
-public abstract class EventHandler {	
-	public static final String FIELD_NAME = "foo";
+public class EventHandler {	
 	public static final String CLASS_NAME = "client.Main";	
 	
-	public static void request(VirtualMachine vm) {
+	public static Logger logger = new PrintLogger();
+	
+	public static void requestEvents(VirtualMachine vm) {
 		EventRequestManager erm = vm.eventRequestManager();
 		ClassPrepareRequest classPrepareRequest = erm.createClassPrepareRequest();
 		classPrepareRequest.addClassFilter(CLASS_NAME);
@@ -74,18 +73,26 @@ public abstract class EventHandler {
 	
 	private static void addFieldWatch(VirtualMachine vm, ReferenceType refType) {
 		EventRequestManager erm = vm.eventRequestManager();
-		Field field = refType.fieldByName(FIELD_NAME);
+		List<Field> fields = refType.allFields();
+		for(Field field : fields) {
 		ModificationWatchpointRequest modificationWatchpointRequest = erm
 				.createModificationWatchpointRequest(field);
 		modificationWatchpointRequest.setEnabled(true);
+		}
 	}
 	
 	private static void handleModificationWatchPointEvent(VirtualMachine vm, ModificationWatchpointEvent event) {
 		// a Test.foo has changed
 		ModificationWatchpointEvent modEvent = (ModificationWatchpointEvent)event;
-		System.out.println("old=" + modEvent.valueCurrent());
-		System.out.println("new=" + modEvent.valueToBe());
-		System.out.println();
+		
+		try {
+			logger.log(modEvent.location().sourceName(), modEvent.location().lineNumber(),
+						modEvent.field().name(), modEvent.valueToBe());
+		} catch (AbsentInformationException e) {
+			// TODO Auto-generated catch block
+			System.err.println("Cannot access current filename!");
+			e.printStackTrace();
+		}
 	}
 	
 	private static ThreadsMap threads = new ThreadsMap();

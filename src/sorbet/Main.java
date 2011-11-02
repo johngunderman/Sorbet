@@ -17,7 +17,7 @@ public class Main {
 	public static void main(String args[]) {		
 		VirtualMachine vm = launchVirtualMachine(EventHandler.CLASS_NAME);		
 		
-		EventHandler.request(vm);
+		EventHandler.requestEvents(vm);
 		
 		debugLoop(vm);
 	}		
