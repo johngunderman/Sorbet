@@ -14,16 +14,13 @@ import com.sun.jdi.event.Event;
 import com.sun.jdi.event.EventSet;
 
 public class Main {	
-
-
 	public static void main(String args[]) {		
 		VirtualMachine vm = launchVirtualMachine(EventHandler.CLASS_NAME);		
 		
 		EventHandler.requestEvents(vm);
 		
 		debugLoop(vm);
-	}
-		
+	}		
 	
 	private static VirtualMachine launchVirtualMachine(String mainArg) {
 		VirtualMachineManager manager = Bootstrap.virtualMachineManager();
@@ -42,11 +39,9 @@ public class Main {
 			new StreamTunnel(vm.process().getErrorStream(), System.err);
 			
 			return vm;
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
             throw new Error("Error: Could not launch target VM: " + e.getMessage());
-        } 
-		catch (IllegalConnectorArgumentsException e) {
+        } catch (IllegalConnectorArgumentsException e) {
 			StringBuffer args = new StringBuffer();
 			
 			for (String arg : e.argumentNames()) {
@@ -54,8 +49,7 @@ public class Main {
 			}
 			
             throw new Error("Error: Could not launch target VM because of illegal arguments: " + args.toString());
-        } 
-		catch (VMStartException e) {
+        } catch (VMStartException e) {
             throw new Error("Error: Could not launch target VM: " + e.getMessage());
         }
 	}
@@ -74,12 +68,9 @@ public class Main {
 				}
 					
 				eventSet.resume();				
-			} 
-			catch (InterruptedException e) {
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	
-
 }

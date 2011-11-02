@@ -20,8 +20,7 @@ import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.ModificationWatchpointRequest;
 import com.sun.jdi.request.StepRequest;
 
-public class EventHandler {
-	
+public class EventHandler {	
 	public static final String FIELD_NAME = "foo";
 	public static final String CLASS_NAME = "client.Main";	
 	
@@ -56,10 +55,10 @@ public class EventHandler {
 			handleClassPrepareEvent(vm, (ClassPrepareEvent)event);
 		} else if (event instanceof ModificationWatchpointEvent) {
 			handleModificationWatchPointEvent(vm, (ModificationWatchpointEvent)event);
-		}
-		else if (event instanceof StepEvent) {
+		} else if (event instanceof StepEvent) {
 			handleStepEvent(vm, (StepEvent)event);
 		}
+		
 		return 0;
 	}	
 
@@ -103,8 +102,7 @@ public class EventHandler {
 							for (LocalVariable var : frame.visibleVariables()) {
 								System.out.println("\t\t" + var.name() + " = " + frame.getValue(var));
 							}
-						} 
-						catch (AbsentInformationException e) {
+						} catch (AbsentInformationException e) {
 							System.out.println("\t\tNo stack variables available for this thread");
 						} 
 					}
@@ -112,11 +110,9 @@ public class EventHandler {
 					System.out.println("\t\tNo stack variables available for this thread");
 				}
 			}
-		} 
-		catch (AbsentInformationException e) {
+		} catch (AbsentInformationException e) {
 			System.out.println("No location information available for this step");
-		}
-		catch (IndexOutOfBoundsException e) {
+		} catch (IndexOutOfBoundsException e) {
 			e.printStackTrace();
 		}	
 	}
