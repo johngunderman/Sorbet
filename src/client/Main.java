@@ -3,6 +3,7 @@ package client;
 public class Main {
 	
 	static int foo = 0;
+	static int foobar = 9;
 	
 	public static void main(String[] args) {
 		 
@@ -15,6 +16,7 @@ public class Main {
 			b++;
 		}
 		
+		foobar--;
 		
 		String i = "hi!";
 		int j = 0;
@@ -30,5 +32,7 @@ public class Main {
 		int i = 2;
 		
 		int j = 6;
+		
+		foobar++;
 	}
 }

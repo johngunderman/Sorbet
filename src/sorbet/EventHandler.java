@@ -1,5 +1,7 @@
 package sorbet;
 
+import java.util.List;
+
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.Field;
 import com.sun.jdi.IncompatibleThreadStateException;
@@ -21,7 +23,6 @@ import com.sun.jdi.request.ModificationWatchpointRequest;
 import com.sun.jdi.request.StepRequest;
 
 public class EventHandler {	
-	public static final String FIELD_NAME = "foo";
 	public static final String CLASS_NAME = "client.Main";	
 	
 	public static void requestEvents(VirtualMachine vm) {
@@ -71,15 +72,18 @@ public class EventHandler {
 	
 	private static void addFieldWatch(VirtualMachine vm, ReferenceType refType) {
 		EventRequestManager erm = vm.eventRequestManager();
-		Field field = refType.fieldByName(FIELD_NAME);
+		List<Field> fields = refType.allFields();
+		for(Field field : fields) {
 		ModificationWatchpointRequest modificationWatchpointRequest = erm
 				.createModificationWatchpointRequest(field);
 		modificationWatchpointRequest.setEnabled(true);
+		}
 	}
 	
 	private static void handleModificationWatchPointEvent(VirtualMachine vm, ModificationWatchpointEvent event) {
 		// a Test.foo has changed
 		ModificationWatchpointEvent modEvent = (ModificationWatchpointEvent)event;
+		System.out.println("name: " + modEvent.field().name());
 		System.out.println("old=" + modEvent.valueCurrent());
 		System.out.println("new=" + modEvent.valueToBe());
 		System.out.println();
