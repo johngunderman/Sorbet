@@ -21,9 +21,12 @@ import com.sun.jdi.request.ClassPrepareRequest;
 import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.ModificationWatchpointRequest;
 import com.sun.jdi.request.StepRequest;
+import log.*;
 
 public class EventHandler {	
 	public static final String CLASS_NAME = "client.Main";	
+	
+	public static Logger logger = new PrintLogger();
 	
 	public static void requestEvents(VirtualMachine vm) {
 		EventRequestManager erm = vm.eventRequestManager();
@@ -83,17 +86,15 @@ public class EventHandler {
 	private static void handleModificationWatchPointEvent(VirtualMachine vm, ModificationWatchpointEvent event) {
 		// a Test.foo has changed
 		ModificationWatchpointEvent modEvent = (ModificationWatchpointEvent)event;
+		
 		try {
-			System.out.println("file: " + modEvent.location().sourceName());
+			logger.log(modEvent.location().sourceName(), modEvent.location().lineNumber(),
+						modEvent.field().name(), modEvent.valueToBe());
 		} catch (AbsentInformationException e) {
 			// TODO Auto-generated catch block
+			System.err.println("Cannot access current filename!");
 			e.printStackTrace();
 		}
-		System.out.println("line: " + modEvent.location().lineNumber());
-		System.out.println("name: " + modEvent.field().name());
-		System.out.println("old=" + modEvent.valueCurrent());
-		System.out.println("new=" + modEvent.valueToBe());
-		System.out.println();
 	}
 	
 	private static void handleStepEvent(VirtualMachine vm, StepEvent event) {
