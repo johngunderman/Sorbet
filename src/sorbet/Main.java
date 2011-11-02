@@ -100,18 +100,12 @@ public class Main {
 			try {
 				EventSet eventSet = vm.eventQueue().remove();
 				for (Event event : eventSet) {
-					if (event instanceof VMDeathEvent || event instanceof VMDisconnectEvent) {
-						// exit
+					if (eventHandler(vm,event) == -1) {
 						return;
-					} else if (event instanceof ClassPrepareEvent) {
-						handleClassPrepareEvent(vm, (ClassPrepareEvent)event);
-					} else if (event instanceof ModificationWatchpointEvent) {
-						handleModificationWatchPointEvent(vm, (ModificationWatchpointEvent)event);
 					}
-					else if (event instanceof StepEvent) {
-						handleStepEvent(vm, (StepEvent)event);
-					}
+					
 				}
+					
 				eventSet.resume();				
 			} 
 			catch (InterruptedException e) {
@@ -120,6 +114,32 @@ public class Main {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param vm
+	 * @param event
+	 * @return an action code
+	 *   -1 stop debug loop on return
+	 *    0 ignore
+	 */
+	private static int eventHandler(VirtualMachine vm, Event event) {
+		// TODO Auto-generated method stub
+		
+		if (event instanceof VMDeathEvent || event instanceof VMDisconnectEvent) {
+			// exit
+			return -1;
+		} else if (event instanceof ClassPrepareEvent) {
+			handleClassPrepareEvent(vm, (ClassPrepareEvent)event);
+		} else if (event instanceof ModificationWatchpointEvent) {
+			handleModificationWatchPointEvent(vm, (ModificationWatchpointEvent)event);
+		}
+		else if (event instanceof StepEvent) {
+			handleStepEvent(vm, (StepEvent)event);
+		}
+		return 0;
+	}
+	
+
 	private static void handleClassPrepareEvent(VirtualMachine vm, ClassPrepareEvent event) {
 		// watch field on loaded class
 		ClassPrepareEvent classPrepEvent = (ClassPrepareEvent) event;
