@@ -20,7 +20,6 @@ import com.sun.jdi.connect.LaunchingConnector;
 import com.sun.jdi.connect.VMStartException;
 import com.sun.jdi.event.ClassPrepareEvent;
 import com.sun.jdi.event.Event;
-import com.sun.jdi.event.EventQueue;
 import com.sun.jdi.event.EventSet;
 import com.sun.jdi.event.ModificationWatchpointEvent;
 import com.sun.jdi.event.StepEvent;
