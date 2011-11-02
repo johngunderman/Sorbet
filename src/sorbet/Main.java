@@ -3,32 +3,15 @@ package sorbet;
 import java.io.IOException;
 import java.util.Map;
 
-import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.Bootstrap;
-import com.sun.jdi.Field;
-import com.sun.jdi.IncompatibleThreadStateException;
-import com.sun.jdi.LocalVariable;
-import com.sun.jdi.Location;
-import com.sun.jdi.ReferenceType;
-import com.sun.jdi.StackFrame;
-import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.VirtualMachineManager;
 import com.sun.jdi.connect.Connector;
 import com.sun.jdi.connect.IllegalConnectorArgumentsException;
 import com.sun.jdi.connect.LaunchingConnector;
 import com.sun.jdi.connect.VMStartException;
-import com.sun.jdi.event.ClassPrepareEvent;
 import com.sun.jdi.event.Event;
 import com.sun.jdi.event.EventSet;
-import com.sun.jdi.event.ModificationWatchpointEvent;
-import com.sun.jdi.event.StepEvent;
-import com.sun.jdi.event.VMDeathEvent;
-import com.sun.jdi.event.VMDisconnectEvent;
-import com.sun.jdi.request.ClassPrepareRequest;
-import com.sun.jdi.request.EventRequestManager;
-import com.sun.jdi.request.ModificationWatchpointRequest;
-import com.sun.jdi.request.StepRequest;
 
 public class Main {	
 
@@ -55,8 +38,8 @@ public class Main {
 			VirtualMachine vm = connector.launch(arguments);
 			
 			// Forward standard out and standard error
-			StreamTunnel outputStreamTunnel = new StreamTunnel(vm.process().getInputStream(), System.out);
-			StreamTunnel errorStreamTunnel = new StreamTunnel(vm.process().getErrorStream(), System.err);
+			new StreamTunnel(vm.process().getInputStream(), System.out);
+			new StreamTunnel(vm.process().getErrorStream(), System.err);
 			
 			return vm;
 		}

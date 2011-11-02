@@ -23,8 +23,7 @@ import com.sun.jdi.request.StepRequest;
 public class EventHandler {
 	
 	public static final String FIELD_NAME = "foo";
-	public static final String CLASS_NAME = "client.Main";
-	
+	public static final String CLASS_NAME = "client.Main";	
 	
 	public static void requestEvents(VirtualMachine vm) {
 		EventRequestManager erm = vm.eventRequestManager();
@@ -62,8 +61,7 @@ public class EventHandler {
 			handleStepEvent(vm, (StepEvent)event);
 		}
 		return 0;
-	}
-	
+	}	
 
 	private static void handleClassPrepareEvent(VirtualMachine vm, ClassPrepareEvent event) {
 		// watch field on loaded class
