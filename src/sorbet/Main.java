@@ -1,7 +1,6 @@
 package sorbet;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import com.sun.jdi.AbsentInformationException;
@@ -40,96 +39,9 @@ public class Main {
 	public static void main(String args[]) {		
 		VirtualMachine vm = launchVirtualMachine(CLASS_NAME);		
 		
-		EventRequestManager erm = vm.eventRequestManager();
-		ClassPrepareRequest classPrepareRequest = erm.createClassPrepareRequest();
-		classPrepareRequest.addClassFilter(CLASS_NAME);
-		classPrepareRequest.enable();
+		requestEvents(vm);
 		
-		for (ThreadReference ref : vm.allThreads()) {
-			StepRequest request = erm.createStepRequest(ref, StepRequest.STEP_LINE, StepRequest.STEP_INTO);
-			request.addClassFilter(CLASS_NAME);
-			request.enable();
-		}
-		
-		vm.resume();
-		
-	    EventQueue eventQueue = vm.eventQueue();
-
-		while (true) {
-			EventSet eventSet;
-			try {
-				eventSet = eventQueue.remove();
-				for (Event event : eventSet) {
-					if (event instanceof VMDeathEvent
-							|| event instanceof VMDisconnectEvent) {
-						// exit
-						return;
-					} else if (event instanceof ClassPrepareEvent) {
-						// watch field on loaded class
-						ClassPrepareEvent classPrepEvent = (ClassPrepareEvent) event;
-						ReferenceType refType = classPrepEvent.referenceType();
-						addFieldWatch(vm, refType);
-					} else if (event instanceof ModificationWatchpointEvent) {
-						// a Test.foo has changed
-						ModificationWatchpointEvent modEvent = (ModificationWatchpointEvent) event;
-						System.out.println("old=" + modEvent.valueCurrent());
-						System.out.println("new=" + modEvent.valueToBe());
-						System.out.println();
-					}
-					else if (event instanceof StepEvent) {
-						StepEvent stepEvent = (StepEvent)event;
-						
-						Location location = stepEvent.location();
-						try {
-							System.out.println("Step: " + location.sourcePath() + ":" + location.lineNumber() + " (" 
-									+ location.method() + ")");
-							
-							for (ThreadReference thread : vm.allThreads()) {								
-								System.out.println("\tThread: " + thread.name());
-								
-								try {
-									if (thread.frameCount() > 0) {
-										try {
-											StackFrame frame = thread.frame(0);
-											
-											try {
-												for (LocalVariable var : frame.visibleVariables()) {
-													System.out.println("\t\t" + var.name() + " = " + frame.getValue(var));
-												}
-											} 
-											catch (AbsentInformationException e) {
-												System.out.println("\t\tNo stack variables available for this thread");
-											} 
-										} 
-										catch (IncompatibleThreadStateException e) {
-											// TODO Auto-generated catch block
-											e.printStackTrace();
-										} 
-										catch (IndexOutOfBoundsException e) {
-											// TODO Auto-generated catch block
-											e.printStackTrace();
-										}	
-									}
-								} catch (IncompatibleThreadStateException e) {
-									// TODO Auto-generated catch block
-									System.out.println("\t\tNo stack variables available for this thread");
-								}
-							}
-						} 
-						catch (AbsentInformationException e) {
-							// TODO Auto-generated catch block
-							//e.printStackTrace();
-							System.out.println("No location information available for this step");
-						}		
-					}
-				}
-				eventSet.resume();
-				
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		debugLoop(vm);
 	}
 		
 	
@@ -168,11 +80,101 @@ public class Main {
         }
 	}
 	
+	private static void requestEvents(VirtualMachine vm) {
+		EventRequestManager erm = vm.eventRequestManager();
+		ClassPrepareRequest classPrepareRequest = erm.createClassPrepareRequest();
+		classPrepareRequest.addClassFilter(CLASS_NAME);
+		classPrepareRequest.enable();
+		
+		for (ThreadReference ref : vm.allThreads()) {
+			StepRequest request = erm.createStepRequest(ref, StepRequest.STEP_LINE, StepRequest.STEP_INTO);
+			request.addClassFilter(CLASS_NAME);
+			request.enable();
+		}
+	}
+	
+	private static void debugLoop(VirtualMachine vm) {
+		vm.resume();
+
+		while (true) {
+			try {
+				EventSet eventSet = vm.eventQueue().remove();
+				for (Event event : eventSet) {
+					if (event instanceof VMDeathEvent || event instanceof VMDisconnectEvent) {
+						// exit
+						return;
+					} else if (event instanceof ClassPrepareEvent) {
+						handleClassPrepareEvent(vm, (ClassPrepareEvent)event);
+					} else if (event instanceof ModificationWatchpointEvent) {
+						handleModificationWatchPointEvent(vm, (ModificationWatchpointEvent)event);
+					}
+					else if (event instanceof StepEvent) {
+						handleStepEvent(vm, (StepEvent)event);
+					}
+				}
+				eventSet.resume();				
+			} 
+			catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private static void handleClassPrepareEvent(VirtualMachine vm, ClassPrepareEvent event) {
+		// watch field on loaded class
+		ClassPrepareEvent classPrepEvent = (ClassPrepareEvent) event;
+		ReferenceType refType = classPrepEvent.referenceType();
+		addFieldWatch(vm, refType);
+	}
+	
 	private static void addFieldWatch(VirtualMachine vm, ReferenceType refType) {
 		EventRequestManager erm = vm.eventRequestManager();
 		Field field = refType.fieldByName(FIELD_NAME);
 		ModificationWatchpointRequest modificationWatchpointRequest = erm
 				.createModificationWatchpointRequest(field);
 		modificationWatchpointRequest.setEnabled(true);
+	}
+	
+	private static void handleModificationWatchPointEvent(VirtualMachine vm, ModificationWatchpointEvent event) {
+		// a Test.foo has changed
+		ModificationWatchpointEvent modEvent = (ModificationWatchpointEvent)event;
+		System.out.println("old=" + modEvent.valueCurrent());
+		System.out.println("new=" + modEvent.valueToBe());
+		System.out.println();
+	}
+	
+	private static void handleStepEvent(VirtualMachine vm, StepEvent event) {
+		Location location = event.location();
+		try {
+			System.out.println("Step: " + location.sourcePath() + ":" + location.lineNumber() + " (" 
+					+ location.method() + ")");
+			
+			for (ThreadReference thread : vm.allThreads()) {								
+				System.out.println("\tThread: " + thread.name());
+				
+				try {
+					if (thread.frameCount() > 0) {
+						StackFrame frame = thread.frame(0);
+						
+						try {
+							for (LocalVariable var : frame.visibleVariables()) {
+								System.out.println("\t\t" + var.name() + " = " + frame.getValue(var));
+							}
+						} 
+						catch (AbsentInformationException e) {
+							System.out.println("\t\tNo stack variables available for this thread");
+						} 
+					}
+				} catch (IncompatibleThreadStateException e) {
+					System.out.println("\t\tNo stack variables available for this thread");
+				}
+			}
+		} 
+		catch (AbsentInformationException e) {
+			System.out.println("No location information available for this step");
+		}
+		catch (IndexOutOfBoundsException e) {
+			e.printStackTrace();
+		}	
 	}
 }
