@@ -32,13 +32,11 @@ import com.sun.jdi.request.StepRequest;
 
 public class Main {	
 
-	public static final String FIELD_NAME = "foo";
-	public static final String CLASS_NAME = "client.Main";
-	
+
 	public static void main(String args[]) {		
-		VirtualMachine vm = launchVirtualMachine(CLASS_NAME);		
+		VirtualMachine vm = launchVirtualMachine(EventHandler.CLASS_NAME);		
 		
-		requestEvents(vm);
+		EventHandler.requestEvents(vm);
 		
 		debugLoop(vm);
 	}
@@ -79,19 +77,6 @@ public class Main {
         }
 	}
 	
-	private static void requestEvents(VirtualMachine vm) {
-		EventRequestManager erm = vm.eventRequestManager();
-		ClassPrepareRequest classPrepareRequest = erm.createClassPrepareRequest();
-		classPrepareRequest.addClassFilter(CLASS_NAME);
-		classPrepareRequest.enable();
-		
-		for (ThreadReference ref : vm.allThreads()) {
-			StepRequest request = erm.createStepRequest(ref, StepRequest.STEP_LINE, StepRequest.STEP_INTO);
-			request.addClassFilter(CLASS_NAME);
-			request.enable();
-		}
-	}
-	
 	private static void debugLoop(VirtualMachine vm) {
 		vm.resume();
 
@@ -99,7 +84,7 @@ public class Main {
 			try {
 				EventSet eventSet = vm.eventQueue().remove();
 				for (Event event : eventSet) {
-					if (eventHandler(vm,event) == -1) {
+					if (EventHandler.eventHandler(vm,event) == -1) {
 						return;
 					}
 					
@@ -113,87 +98,5 @@ public class Main {
 		}
 	}
 	
-	/**
-	 * 
-	 * @param vm
-	 * @param event
-	 * @return an action code
-	 *   -1 stop debug loop on return
-	 *    0 ignore
-	 */
-	private static int eventHandler(VirtualMachine vm, Event event) {
-		// TODO Auto-generated method stub
-		
-		if (event instanceof VMDeathEvent || event instanceof VMDisconnectEvent) {
-			// exit
-			return -1;
-		} else if (event instanceof ClassPrepareEvent) {
-			handleClassPrepareEvent(vm, (ClassPrepareEvent)event);
-		} else if (event instanceof ModificationWatchpointEvent) {
-			handleModificationWatchPointEvent(vm, (ModificationWatchpointEvent)event);
-		}
-		else if (event instanceof StepEvent) {
-			handleStepEvent(vm, (StepEvent)event);
-		}
-		return 0;
-	}
-	
 
-	private static void handleClassPrepareEvent(VirtualMachine vm, ClassPrepareEvent event) {
-		// watch field on loaded class
-		ClassPrepareEvent classPrepEvent = (ClassPrepareEvent) event;
-		ReferenceType refType = classPrepEvent.referenceType();
-		addFieldWatch(vm, refType);
-	}
-	
-	private static void addFieldWatch(VirtualMachine vm, ReferenceType refType) {
-		EventRequestManager erm = vm.eventRequestManager();
-		Field field = refType.fieldByName(FIELD_NAME);
-		ModificationWatchpointRequest modificationWatchpointRequest = erm
-				.createModificationWatchpointRequest(field);
-		modificationWatchpointRequest.setEnabled(true);
-	}
-	
-	private static void handleModificationWatchPointEvent(VirtualMachine vm, ModificationWatchpointEvent event) {
-		// a Test.foo has changed
-		ModificationWatchpointEvent modEvent = (ModificationWatchpointEvent)event;
-		System.out.println("old=" + modEvent.valueCurrent());
-		System.out.println("new=" + modEvent.valueToBe());
-		System.out.println();
-	}
-	
-	private static void handleStepEvent(VirtualMachine vm, StepEvent event) {
-		Location location = event.location();
-		try {
-			System.out.println("Step: " + location.sourcePath() + ":" + location.lineNumber() + " (" 
-					+ location.method() + ")");
-			
-			for (ThreadReference thread : vm.allThreads()) {								
-				System.out.println("\tThread: " + thread.name());
-				
-				try {
-					if (thread.frameCount() > 0) {
-						StackFrame frame = thread.frame(0);
-						
-						try {
-							for (LocalVariable var : frame.visibleVariables()) {
-								System.out.println("\t\t" + var.name() + " = " + frame.getValue(var));
-							}
-						} 
-						catch (AbsentInformationException e) {
-							System.out.println("\t\tNo stack variables available for this thread");
-						} 
-					}
-				} catch (IncompatibleThreadStateException e) {
-					System.out.println("\t\tNo stack variables available for this thread");
-				}
-			}
-		} 
-		catch (AbsentInformationException e) {
-			System.out.println("No location information available for this step");
-		}
-		catch (IndexOutOfBoundsException e) {
-			e.printStackTrace();
-		}	
-	}
 }
