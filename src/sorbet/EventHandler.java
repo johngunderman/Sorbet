@@ -26,7 +26,7 @@ public class EventHandler {
 	public static final String CLASS_NAME = "client.Main";
 	
 	
-	static void requestEvents(VirtualMachine vm) {
+	public static void requestEvents(VirtualMachine vm) {
 		EventRequestManager erm = vm.eventRequestManager();
 		ClassPrepareRequest classPrepareRequest = erm.createClassPrepareRequest();
 		classPrepareRequest.addClassFilter(CLASS_NAME);
@@ -47,7 +47,7 @@ public class EventHandler {
 	 *   -1 stop debug loop on return
 	 *    0 ignore
 	 */
-	static int eventHandler(VirtualMachine vm, Event event) {
+	public static int eventHandler(VirtualMachine vm, Event event) {
 		// TODO Auto-generated method stub
 		
 		if (event instanceof VMDeathEvent || event instanceof VMDisconnectEvent) {
