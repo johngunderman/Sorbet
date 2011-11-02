@@ -8,6 +8,12 @@ public class Main {
 		 
 		foo = 3;
 		
+		int b = 0;
+		
+		for (int a = 0; a < 2; a++) {
+			foo++;
+			b++;
+		}
 		
 		
 		String i = "hi!";
