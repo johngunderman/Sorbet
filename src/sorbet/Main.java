@@ -25,8 +25,6 @@ public class Main {
 	}		
 	
 	private static VirtualMachine launchVirtualMachine(String mainArg) {
-		PrintLogger p = new PrintLogger();
-		p.log("foo.java", 45, "main", "b", null);
 		
 		VirtualMachineManager manager = Bootstrap.virtualMachineManager();
 		
