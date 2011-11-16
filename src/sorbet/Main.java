@@ -3,6 +3,8 @@ package sorbet;
 import java.io.IOException;
 import java.util.Map;
 
+import log.PrintLogger;
+
 import com.sun.jdi.Bootstrap;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.VirtualMachineManager;
@@ -23,6 +25,9 @@ public class Main {
 	}		
 	
 	private static VirtualMachine launchVirtualMachine(String mainArg) {
+		PrintLogger p = new PrintLogger();
+		p.log("foo.java", 45, "main", "b", null);
+		
 		VirtualMachineManager manager = Bootstrap.virtualMachineManager();
 		
 		LaunchingConnector connector = manager.defaultConnector();
