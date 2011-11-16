@@ -25,6 +25,16 @@ public class Main {
 		
 		foo = 5;
 		
+		if (foo == 5) {
+			
+		}
+		else {
+			
+		}
+		
+		double randomVariableOne = Math.random();
+		double randomVariableTwo = Math.random();
+		
 		System.out.println("Client program");
 	}
 	
