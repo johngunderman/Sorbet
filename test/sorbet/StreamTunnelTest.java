@@ -21,9 +21,11 @@ public class StreamTunnelTest {
 	public void testStreamTunnel() {		
 		// Create the random data to test with
 		byte[] inputData = new byte[1024];
-		for (int i = 0; i < inputData.length; i++) {
+		for (int i = 0; i < inputData.length - 2; i++) {
 			inputData[i] = (byte)(Math.random() * Byte.MAX_VALUE);
 		}
+		inputData[1022] = 0;
+		inputData[1023] = Byte.MAX_VALUE;
 		
 		// Create our input and output streams
 		ByteArrayInputStream in = new ByteArrayInputStream(inputData);
