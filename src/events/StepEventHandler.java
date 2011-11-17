@@ -1,9 +1,6 @@
 package events;
 
 import log.Logger;
-import sorbet.ThreadsMap;
-import sorbet.VariablesMap;
-import sorbet.VariablesStack;
 
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.IncompatibleThreadStateException;

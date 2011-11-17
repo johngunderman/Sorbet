@@ -1,4 +1,4 @@
-package sorbet;
+package events;
 
 import java.util.HashMap;
 
