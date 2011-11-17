@@ -110,7 +110,6 @@ public class StepEventHandler implements IEventHandler {
 							Value oldValue = variablesMap.get(variable.name());
 							Value newValue = frame.getValue(variable);
 							
-							// TODO: I think that this equals needs to be refined
 							if (oldValue.equals(newValue) == false) {
 								variablesMap.put(variable.name(), newValue);
 								
@@ -144,9 +143,14 @@ public class StepEventHandler implements IEventHandler {
 	}
 	
 	private class ThreadsMap extends HashMap<String, VariablesStack> {
+
+		private static final long serialVersionUID = -58718752877349620L;
 	}
 	
-	public class VariablesStack extends Stack<VariablesMap> {
+	private class VariablesStack extends Stack<VariablesMap> {
+
+		private static final long serialVersionUID = -7640570711643014510L;
+		
 		private int lineNumber;
 		
 		public int getLineNumber() {
@@ -158,6 +162,8 @@ public class StepEventHandler implements IEventHandler {
 		}
 	}
 	
-	public class VariablesMap extends HashMap<String, Value> {	
+	private class VariablesMap extends HashMap<String, Value> {
+
+		private static final long serialVersionUID = 6201778837494415462L;	
 	}
 }
