@@ -37,7 +37,7 @@ public class StreamTunnel {
 				}
 			}
 			catch (IOException e) {
-				System.out.println("Error: Could not read/write stream: " + e.getMessage());
+				System.err.println("Error: Could not read/write stream: " + e.getMessage());
 			}
 			
 			try {
@@ -45,7 +45,7 @@ public class StreamTunnel {
 				out.close();
 			}
 			catch (IOException e) {
-				System.out.println("Error: Could not close stream: " + e.getMessage());
+				System.err.println("Error: Could not close stream: " + e.getMessage());
 			}
 		}
 	}
