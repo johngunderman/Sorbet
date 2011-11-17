@@ -1,5 +1,8 @@
 package events;
 
+import java.util.HashMap;
+import java.util.Stack;
+
 import log.Logger;
 
 import com.sun.jdi.AbsentInformationException;
@@ -138,5 +141,23 @@ public class StepEventHandler implements IEventHandler {
 		}
 		
 		return 0;
+	}
+	
+	private class ThreadsMap extends HashMap<String, VariablesStack> {
+	}
+	
+	public class VariablesStack extends Stack<VariablesMap> {
+		private int lineNumber;
+		
+		public int getLineNumber() {
+			return lineNumber;
+		}
+		
+		public void setLineNumber(int lineNumber) {
+			this.lineNumber = lineNumber;
+		}
+	}
+	
+	public class VariablesMap extends HashMap<String, Value> {	
 	}
 }
