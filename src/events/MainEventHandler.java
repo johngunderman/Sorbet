@@ -9,8 +9,6 @@ import com.sun.jdi.event.ModificationWatchpointEvent;
 import com.sun.jdi.event.StepEvent;
 import com.sun.jdi.event.VMDeathEvent;
 import com.sun.jdi.event.VMDisconnectEvent;
-import com.sun.jdi.request.ClassPrepareRequest;
-import com.sun.jdi.request.EventRequestManager;
 
 public class MainEventHandler implements IEventHandler {
 	
@@ -33,13 +31,6 @@ public class MainEventHandler implements IEventHandler {
 	}	
 
 	public static final String CLASS_NAME = "client.Main";
-	
-	public void requestEvents() {
-		EventRequestManager erm = vm.eventRequestManager();
-		ClassPrepareRequest classPrepareRequest = erm.createClassPrepareRequest();
-		classPrepareRequest.addClassFilter(CLASS_NAME);
-		classPrepareRequest.enable();		
-	}	
 
 	@Override
 	public int handle(Event event) {		
