@@ -6,6 +6,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
+import mockjdi.MockType;
+import mockjdi.MockValue;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -43,7 +46,7 @@ public class PrintLoggerTest {
 	@Test
 	public final void testLog() {
 		PrintLogger p = new PrintLogger();
-		p.log("foo.java", 45, "main", "b", new MockValue());
+		p.log("foo.java", 45, "main", "b", new MockValue(new MockType("int"), "32"));
 		assertEquals("foo.java:45 in main(), [int] b = 32\n", outContent.toString());
 		assertEquals("", errContent.toString());
 

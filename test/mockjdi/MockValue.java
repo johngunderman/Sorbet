@@ -1,27 +1,34 @@
-package log;
+package mockjdi;
 
 import com.sun.jdi.Type;
 import com.sun.jdi.Value;
 import com.sun.jdi.VirtualMachine;
 
 public class MockValue implements Value {
+	
+	private Type type;
+	
+	private String value;
+	
+	public MockValue(Type mockType, String value) {
+		this.type = mockType;
+		
+		this.value = value;
+	}
 
 	@Override
 	public VirtualMachine virtualMachine() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Type type() {
-		// TODO Auto-generated method stub
-		return new MockType();
+		return type;
 	}
 	
 	@Override
 	public String toString() {
-		return "32";
-		
+		return value;		
 	}
 
 }

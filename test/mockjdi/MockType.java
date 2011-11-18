@@ -1,25 +1,28 @@
-package log;
+package mockjdi;
 
 import com.sun.jdi.Type;
 import com.sun.jdi.VirtualMachine;
 
 public class MockType implements Type {
+	
+	String type;
+	
+	public MockType(String type) {
+		this.type = type;
+	}
 
 	@Override
 	public VirtualMachine virtualMachine() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String name() {
-		// TODO Auto-generated method stub
-		return "int";
+		return type;
 	}
 
 	@Override
 	public String signature() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
