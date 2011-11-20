@@ -7,9 +7,9 @@ public class Main {
 	
 	public static void main(String[] args) {
 		 
-		foo = 3;
+		foo = 3 + 3;
 		
-		int b = 0;
+		int b = 0 + 2;
 		
 		for (int a = 0; a < 2; a++) {
 			foo++;
@@ -25,6 +25,8 @@ public class Main {
 		
 		foo = 5;
 		
+		foo = foo + 5;
+		
 		if (foo == 5) {
 			
 		}
@@ -35,7 +37,9 @@ public class Main {
 		double randomVariableOne = Math.random();
 		double randomVariableTwo = Math.random();
 		
-		System.out.println("Client program");
+		Test test = new Test();
+		
+		System.out.println("Client program " + test.getTest());
 	}
 	
 	public static void bar() {
@@ -43,6 +47,6 @@ public class Main {
 		
 		int j = 6;
 		
-		foobar++;
+		foobar += i + j;
 	}
 }
