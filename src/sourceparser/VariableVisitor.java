@@ -15,26 +15,14 @@ public class VariableVisitor<A> extends VoidVisitorAdapter<A> {
 	}
 	
 	@Override
-	public void visit(NameExpr n, A arg) {
-		System.out.println("NameExpr, line " + n.getBeginLine());
-		
-		System.out.println("\tused: " + n.getName());
-		
-		System.out.println();
-		
+	public void visit(NameExpr n, A arg) {		
 		addVariableToLines(n.getBeginLine(), n.getName());
 		
         super.visit(n, arg);
 	}
 	
 	@Override
-	public void visit(VariableDeclarator n, A arg) {
-		System.out.println("VariableDeclarator, line " + n.getBeginLine());
-		
-		System.out.println("\tdeclared: " + n.getId().getName());
-		
-		System.out.println();
-		
+	public void visit(VariableDeclarator n, A arg) {		
 		addVariableToLines(n.getBeginLine(), n.getId().getName());
 		
         super.visit(n, arg);

@@ -23,6 +23,21 @@ public class SourceParser {
 		
 	}
 	
+	public boolean addPaths(List<String> paths) {
+		return addPaths(paths, true);
+	}
+	
+	public boolean addPaths(List<String> paths, boolean recursive) {
+		boolean success = true;
+		
+		for (String path : paths) {
+			if (addPath(path, recursive) == false) {
+				success = false;
+			}
+		}
+		return success;
+	}
+	
 	public boolean addPath(String path) {
 		return addPath(path, true);
 	}

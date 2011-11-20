@@ -1,7 +1,10 @@
 package sorbet;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+
+import sourceparser.SourceParser;
 
 import log.Logger;
 import log.PrintLogger;
@@ -20,18 +23,25 @@ import events.MainEventHandler;
 
 public class Sorbet {
 	
+	SourceParser sourceParser;
+	
+	private String mainClass;
+	
 	VirtualMachine vm;
 	Logger logger;
 	MainEventHandler mainEventHandler;
 	
-	public Sorbet() {
-		launchVirtualMachine(MainEventHandler.CLASS_NAME);	
+	public Sorbet(List<String> sourcePaths, String mainClass) {
+		
+		sourceParser = new SourceParser();
+		sourceParser.addPaths(sourcePaths);
+		
+		launchVirtualMachine(mainClass);	
 		
 		logger = new PrintLogger();
 		
 		mainEventHandler = new MainEventHandler(vm, logger);
 	}
-
 
 	private void launchVirtualMachine(String mainArg) {
 		
