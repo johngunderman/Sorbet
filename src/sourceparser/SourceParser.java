@@ -19,52 +19,59 @@ public class SourceParser {
 	
 	private Files files = new Files();
 	
-	public SourceParser() {
-		
-	}
-	
-	public boolean addPaths(List<String> paths) {
+	public int addPaths(String paths) {
 		return addPaths(paths, true);
 	}
 	
-	public boolean addPaths(List<String> paths, boolean recursive) {
-		boolean success = true;
+	public int addPaths(String paths, boolean recursive) {
+		List<String> pathList = new LinkedList<String>();
 		
-		for (String path : paths) {
-			if (addPath(path, recursive) == false) {
-				success = false;
-			}
+		for (String path : paths.split(File.pathSeparator)) {
+			pathList.add(path);
 		}
-		return success;
+		
+		return addPaths(pathList, recursive);
 	}
 	
-	public boolean addPath(String path) {
+	public int addPaths(List<String> paths) {
+		return addPaths(paths, true);
+	}
+	
+	public int addPaths(List<String> paths, boolean recursive) {
+		int failed = 0;
+		
+		for (String path : paths) {
+			failed += addPath(path, recursive);
+		}
+		return failed;
+	}
+	
+	public int addPath(String path) {
 		return addPath(path, true);
 	}
 	
-	public boolean addPath(String path, boolean recursive) {
-
-		boolean success = true;
+	public int addPath(String path, boolean recursive) {
+		
+		int failed = 0;
 		
 		File directory = new File(path);
+		File[] files = directory.listFiles();
 		
-		for (File file : directory.listFiles()) {
-			if (file.isFile()) {
-				if (addFile(file.getPath()) == false) {
-					success = false;
+		if (directory != null && files != null) {
+			for (File file : files) {
+				if (file.isFile()) {
+					failed += addFile(file.getPath());
 				}
-			}
-			else if (recursive) {
-				if (addPath(path, recursive) == false) {
-					success = false;
+				else if (recursive) {
+					failed += addPath(path + File.separator + file.getName(), recursive);
 				}
 			}
 		}
 		
-		return success;
+		return failed;
 	}
 	
-	public boolean addFile(String filePath) {		
+	public int addFile(String filePath) {		
 		try {
 			FileInputStream file = new FileInputStream(filePath);
 			
@@ -78,12 +85,12 @@ public class SourceParser {
 			files.put(filePath, lines);
 			
 		} catch (FileNotFoundException e) {
-			return false;
+			return 1;
 		} catch (ParseException e) {
-			return false;
+			return 1;
 		}
 		
-		return true;		
+		return 0;		
 	}
 	
 	public List<String> getVariables(String filePath, int lineNumber) {
