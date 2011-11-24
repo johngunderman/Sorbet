@@ -1,5 +1,6 @@
 package events;
 
+import sourceparser.SourceParser;
 import log.Logger;
 
 import com.sun.jdi.VirtualMachine;
@@ -11,23 +12,24 @@ import com.sun.jdi.event.VMDeathEvent;
 import com.sun.jdi.event.VMDisconnectEvent;
 
 public class MainEventHandler implements IEventHandler {
-	
-	private VirtualMachine vm;
-	
+		
 	private ClassPrepareEventHandler classPrepareEventHandler;
 	private ModificationWatchpointEventHandler modificationWatchpointEventHandler;
 	private StepEventHandler stepEventHandler;
 	
+	private SourceParser sourceParser;
 	private Logger logger;
+	private VirtualMachine vm;
 	
-	public MainEventHandler(VirtualMachine vm, Logger logger) {
+	public MainEventHandler(SourceParser sourceParser, Logger logger, VirtualMachine vm) {
+
+		this.sourceParser = sourceParser;
+		this.logger = logger;
 		this.vm = vm;
 		
-		classPrepareEventHandler = new ClassPrepareEventHandler(vm, logger);
-		modificationWatchpointEventHandler = new ModificationWatchpointEventHandler(vm, logger);
-		stepEventHandler = new StepEventHandler(vm, logger);
-		
-		this.logger = logger;
+		classPrepareEventHandler = new ClassPrepareEventHandler(sourceParser, logger, vm);
+		modificationWatchpointEventHandler = new ModificationWatchpointEventHandler(sourceParser, logger, vm);
+		stepEventHandler = new StepEventHandler(sourceParser, logger, vm);
 	}	
 
 	public static final String CLASS_NAME = "client.Main";

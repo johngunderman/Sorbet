@@ -3,6 +3,8 @@ package events;
 import java.util.HashMap;
 import java.util.Stack;
 
+import sourceparser.SourceParser;
+
 import log.Logger;
 
 import com.sun.jdi.AbsentInformationException;
@@ -19,16 +21,18 @@ import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.StepRequest;
 
 public class StepEventHandler implements IEventHandler {
-	
+
+	private SourceParser sourceParser;
 	private Logger logger;
-	
 	private VirtualMachine vm;
+	
 	private ThreadsMap threads;
 	
-	public StepEventHandler(VirtualMachine vm, Logger logger) {
-		this.vm = vm;
-		
+	public StepEventHandler(SourceParser sourceParser, Logger logger, VirtualMachine vm) {
+
+		this.sourceParser = sourceParser;
 		this.logger = logger;
+		this.vm = vm;
 		
 		this.threads = new ThreadsMap();
 		

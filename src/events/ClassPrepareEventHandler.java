@@ -2,6 +2,8 @@ package events;
 
 import java.util.List;
 
+import sourceparser.SourceParser;
+
 import log.Logger;
 
 import com.sun.jdi.Field;
@@ -15,13 +17,15 @@ import com.sun.jdi.request.ModificationWatchpointRequest;
 
 public class ClassPrepareEventHandler implements IEventHandler {
 	
-	private VirtualMachine vm;
+	private SourceParser sourceParser;
 	private Logger logger;
+	private VirtualMachine vm;
 	
-	public ClassPrepareEventHandler(VirtualMachine vm, Logger logger) {
-		this.vm = vm;
-		
+	public ClassPrepareEventHandler(SourceParser sourceParser, Logger logger, VirtualMachine vm) {
+
+		this.sourceParser = sourceParser;
 		this.logger = logger;
+		this.vm = vm;
 		
 		requestEvents();
 	}

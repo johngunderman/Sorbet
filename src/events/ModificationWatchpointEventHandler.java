@@ -1,5 +1,6 @@
 package events;
 
+import sourceparser.SourceParser;
 import log.Logger;
 
 import com.sun.jdi.AbsentInformationException;
@@ -8,15 +9,16 @@ import com.sun.jdi.event.Event;
 import com.sun.jdi.event.ModificationWatchpointEvent;
 
 public class ModificationWatchpointEventHandler implements IEventHandler {
-	
+
+	private SourceParser sourceParser;
+	private Logger logger;
 	private VirtualMachine vm;
 	
-	private Logger logger;
-	
-	public ModificationWatchpointEventHandler(VirtualMachine vm, Logger logger) {
-		this.vm = vm;
-		
+	public ModificationWatchpointEventHandler(SourceParser sourceParser, Logger logger, VirtualMachine vm) {
+
+		this.sourceParser = sourceParser;
 		this.logger = logger;
+		this.vm = vm;
 		
 		// TODO: The events for this are requested in ClassPrepareEventHandler.  Merge these classes?
 	}
