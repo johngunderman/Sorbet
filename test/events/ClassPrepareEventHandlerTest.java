@@ -16,6 +16,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import sourceparser.SourceParser;
+
 import com.sun.jdi.Field;
 import com.sun.jdi.event.ClassPrepareEvent;
 
@@ -39,7 +41,7 @@ public class ClassPrepareEventHandlerTest {
 
 	@Test
 	public void testClassPrepareEventHandler() {
-		ClassPrepareEventHandler classPrepareEventHandler = new ClassPrepareEventHandler(new MockVirtualMachine(), new MockLogger());
+		ClassPrepareEventHandler classPrepareEventHandler = new ClassPrepareEventHandler(new SourceParser(), new MockLogger(), new MockVirtualMachine());
 	}
 
 	@Test
@@ -49,7 +51,7 @@ public class ClassPrepareEventHandlerTest {
 		allFields.add(new MockField());
 		ClassPrepareEvent classPrepareEvent = new MockClassPrepareEvent(new MockReferenceType("type", allFields));
 		
-		ClassPrepareEventHandler classPrepareEventHandler = new ClassPrepareEventHandler(new MockVirtualMachine(), new MockLogger());
+		ClassPrepareEventHandler classPrepareEventHandler = new ClassPrepareEventHandler(new SourceParser(), new MockLogger(), new MockVirtualMachine());
 		classPrepareEventHandler.handle(classPrepareEvent);
 	}
 
