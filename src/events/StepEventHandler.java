@@ -1,5 +1,6 @@
 package events;
 
+import java.util.List;
 import java.util.HashMap;
 import java.util.Stack;
 
@@ -127,6 +128,14 @@ public class StepEventHandler implements IEventHandler {
 							variablesMap.put(variable.name(), newValue);
 							
 							logger.log(sourcePath, variablesStack.getLineNumber(), methodName, variable.name(), newValue);
+						}						
+					}					
+
+					System.out.println("Step in " + sourcePath + ":" + lineNumber);
+					List<String> variables = sourceParser.getVariables(sourcePath, lineNumber);
+					if (variables != null) {
+						for (String variable : variables) {
+							System.out.println("\tUsed " + variable);
 						}
 					}
 					

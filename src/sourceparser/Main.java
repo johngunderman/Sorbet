@@ -6,9 +6,9 @@ public class Main {
 		
 		SourceParser sourceParser = new SourceParser();
 		
-		sourceParser.addPath("src/client/");
+		sourceParser.addRootPaths("src/client/");
 		
-		for (String variable : sourceParser.getVariables("src/client/Main.java", 50)) {
+		for (String variable : sourceParser.getVariables("Main.java", 50)) {
 			System.out.print(variable + ", ");
 		}
 	}

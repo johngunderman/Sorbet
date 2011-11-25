@@ -13,7 +13,7 @@ import org.junit.Test;
 
 public class SourceParserTest {
 	
-	private static final String basePath = "test/sourceparser/testfiles/";
+	private static final String rootPath = "test/sourceparser/testfiles/";
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -32,275 +32,40 @@ public class SourceParserTest {
 	}
 	
 	@Test
-	public void testAddPathsString() {
-		SourceParser sourceParser = new SourceParser();	
+	public void testAddRootPaths() {
+		SourceParser sourceParser;
 		
-		// Test adding a single path that doesn't exist
-		String paths = basePath + "thisDirectoryDoesntExist";
-		assertEquals(0, sourceParser.addPaths(paths));		
+		// Test a path that exists with only valid files
+		sourceParser = new SourceParser();
+		assertEquals(0, sourceParser.addRootPaths(rootPath + "valid"));		
+		// Test adding it twice
+		assertEquals(1, sourceParser.addRootPaths(rootPath + "valid"));
 		
-		// Test adding two paths that don't exist
-		paths += ":" + basePath + "thisDirectoryAlsoDoesntExist";
-		assertEquals(0, sourceParser.addPaths(paths));	
+		// Test adding a path that exists with only invalid files
+		sourceParser = new SourceParser();
+		assertEquals(1, sourceParser.addRootPaths(rootPath + "invalid"));		
+		// Test adding it twice
+		assertEquals(1, sourceParser.addRootPaths(rootPath + "invalid"));
 		
-		// Test adding a path with all valid files
-		paths = basePath + "valid";		
-		assertEquals(0, sourceParser.addPaths(paths));	
+		// Test adding a path that contains both files
+		sourceParser = new SourceParser();
+		assertEquals(1, sourceParser.addRootPaths(rootPath + "mixed"));		
+		// Test adding it twice
+		assertEquals(2, sourceParser.addRootPaths(rootPath + "mixed"));
 		
-		// Test adding a path with all invalid files
-		paths = basePath + "invalid";		
-		assertEquals(1, sourceParser.addPaths(paths));	
-
-		// Test adding a path with all both valid and invalid files
-		paths = basePath + "mixed";	
-		assertEquals(1, sourceParser.addPaths(paths));	
-		
-		// Test adding a path with valid and a path with invalid
-		paths = basePath + "valid" + ":" + basePath + "invalid";
-		assertEquals(1, sourceParser.addPaths(paths));
-		
-		// Test adding a path with valid and a path with invalid and a path that doesn't exist
-		paths += ":" + basePath + "thisDirectoryDoesntExist";
-		assertEquals(1, sourceParser.addPaths(paths));
-		
-		// Test adding with a path that doesn't exist and a recursive path
-		paths = basePath + ":" + basePath + "thisDirectoryDoesntExist";
-		assertEquals(2, sourceParser.addPaths(paths)); // recursive
-		
-		// Test adding with a path that doesn't exist and a recursive path (opposite order)
-		paths = basePath + "thisDirectoryDoesntExist" + ":" + basePath;
-		assertEquals(2, sourceParser.addPaths(paths)); // recursive	
-	}
-
-	@Test
-	public void testAddPathsStringBoolean() {
-		SourceParser sourceParser = new SourceParser();	
-		
-		// Test adding a single path that doesn't exist
-		String paths = basePath + "thisDirectoryDoesntExist";		
-		assertEquals(0, sourceParser.addPaths(paths, false));
-		assertEquals(0, sourceParser.addPaths(paths, true));		
-		
-		// Test adding two paths that don't exist
-		paths += ":" + basePath + "thisDirectoryAlsoDoesntExist";		
-		assertEquals(0, sourceParser.addPaths(paths, false));
-		assertEquals(0, sourceParser.addPaths(paths, true));	
-		
-		// Test adding a path with all valid files
-		paths = basePath + "valid";		
-		assertEquals(0, sourceParser.addPaths(paths, false));
-		assertEquals(0, sourceParser.addPaths(paths, true));	
-		
-		// Test adding a path with all invalid files
-		paths = basePath + "invalid";		
-		assertEquals(1, sourceParser.addPaths(paths, false));
-		assertEquals(1, sourceParser.addPaths(paths, true));	
-
-		// Test adding a path with all both valid and invalid files
-		paths = basePath + "mixed";	
-		assertEquals(1, sourceParser.addPaths(paths, false));
-		assertEquals(1, sourceParser.addPaths(paths, true));	
-		
-		// Test adding a path with valid and a path with invalid
-		paths = basePath + "valid" + ":" + basePath + "invalid";
-		assertEquals(1, sourceParser.addPaths(paths, false));
-		assertEquals(1, sourceParser.addPaths(paths, true));
-		
-		// Test adding a path with valid and a path with invalid and a path that doesn't exist
-		paths += ":" + basePath + "thisDirectoryDoesntExist";
-		assertEquals(1, sourceParser.addPaths(paths, false));
-		assertEquals(1, sourceParser.addPaths(paths, true));
-		
-		// Test adding with a path that doesn't exist and a recursive path
-		paths = basePath + ":" + basePath + "thisDirectoryDoesntExist";
-		assertEquals(0, sourceParser.addPaths(paths, false)); // non-recursive
-		assertEquals(2, sourceParser.addPaths(paths, true)); // recursive
-		
-		// Test adding with a path that doesn't exist and a recursive path (opposite order)
-		paths = basePath + "thisDirectoryDoesntExist" + ":" + basePath;
-		assertEquals(0, sourceParser.addPaths(paths, false)); // non-recursive
-		assertEquals(2, sourceParser.addPaths(paths, true)); // recursive	
-	}
-
-	@Test
-	public void testAddPathsListOfString() {
-		SourceParser sourceParser = new SourceParser();		
-		List<String> paths = new LinkedList<String>();
-		
-		// Test adding a single path that doesn't exist
-		paths.add(basePath + "thisDirectoryDoesntExist");		
-		assertEquals(0, sourceParser.addPaths(paths));	
-		
-		// Test adding two paths that don't exist
-		paths.add(basePath + "thisDirectoryAlsoDoesntExist");		
-		assertEquals(0, sourceParser.addPaths(paths));
-		
-		// Test adding a path with all valid files
-		paths = new LinkedList<String>();
-		paths.add(basePath + "valid");		
-		assertEquals(0, sourceParser.addPaths(paths));	
-		
-		// Test adding a path with all invalid files
-		paths = new LinkedList<String>();
-		paths.add(basePath + "invalid");		
-		assertEquals(1, sourceParser.addPaths(paths));	
-
-		// Test adding a path with all both valid and invalid files
-		paths = new LinkedList<String>();
-		paths.add(basePath + "mixed");		
-		assertEquals(1, sourceParser.addPaths(paths));
-		
-		// Test adding a path with valid and a path with invalid
-		paths = new LinkedList<String>();
-		paths.add(basePath + "valid");
-		paths.add(basePath + "invalid");
-		assertEquals(1, sourceParser.addPaths(paths));
-		
-		// Test adding a path with valid and a path with invalid and a path that doesn't exist
-		paths.add(basePath + "thisDirectoryDoesntExist");
-		assertEquals(1, sourceParser.addPaths(paths));
-		
-		// Test adding with a path that doesn't exist and a recursive path
-		paths = new LinkedList<String>();
-		paths.add(basePath);
-		paths.add(basePath + "thisDirectoryDoesntExist");
-		assertEquals(2, sourceParser.addPaths(paths));
-		
-		// Test adding with a path that doesn't exist and a recursive path (opposite order)
-		paths = new LinkedList<String>();
-		paths.add(basePath + "thisDirectoryDoesntExist");
-		paths.add(basePath);
-		assertEquals(2, sourceParser.addPaths(paths));
-	}
-
-	@Test
-	public void testAddPathsListOfStringBoolean() {
-		SourceParser sourceParser = new SourceParser();		
-		List<String> paths = new LinkedList<String>();
-		
-		// Test adding a single path that doesn't exist
-		paths.add(basePath + "thisDirectoryDoesntExist");		
-		assertEquals(0, sourceParser.addPaths(paths, false));
-		assertEquals(0, sourceParser.addPaths(paths, true));		
-		
-		// Test adding two paths that don't exist
-		paths.add(basePath + "thisDirectoryAlsoDoesntExist");		
-		assertEquals(0, sourceParser.addPaths(paths, false));
-		assertEquals(0, sourceParser.addPaths(paths, true));	
-		
-		// Test adding a path with all valid files
-		paths = new LinkedList<String>();
-		paths.add(basePath + "valid");		
-		assertEquals(0, sourceParser.addPaths(paths, false));
-		assertEquals(0, sourceParser.addPaths(paths, true));	
-		
-		// Test adding a path with all invalid files
-		paths = new LinkedList<String>();
-		paths.add(basePath + "invalid");		
-		assertEquals(1, sourceParser.addPaths(paths, false));
-		assertEquals(1, sourceParser.addPaths(paths, true));	
-
-		// Test adding a path with all both valid and invalid files
-		paths = new LinkedList<String>();
-		paths.add(basePath + "mixed");		
-		assertEquals(1, sourceParser.addPaths(paths, false));
-		assertEquals(1, sourceParser.addPaths(paths, true));	
-		
-		// Test adding a path with valid and a path with invalid
-		paths = new LinkedList<String>();
-		paths.add(basePath + "valid");
-		paths.add(basePath + "invalid");
-		assertEquals(1, sourceParser.addPaths(paths, false));
-		assertEquals(1, sourceParser.addPaths(paths, true));
-		
-		// Test adding a path with valid and a path with invalid and a path that doesn't exist
-		paths.add(basePath + "thisDirectoryDoesntExist");
-		assertEquals(1, sourceParser.addPaths(paths, false));
-		assertEquals(1, sourceParser.addPaths(paths, true));
-		
-		// Test adding with a path that doesn't exist and a recursive path
-		paths = new LinkedList<String>();
-		paths.add(basePath);
-		paths.add(basePath + "thisDirectoryDoesntExist");
-		assertEquals(0, sourceParser.addPaths(paths, false)); // non-recursive
-		assertEquals(2, sourceParser.addPaths(paths, true)); // recursive
-		
-		// Test adding with a path that doesn't exist and a recursive path (opposite order)
-		paths = new LinkedList<String>();
-		paths.add(basePath + "thisDirectoryDoesntExist");
-		paths.add(basePath);
-		assertEquals(0, sourceParser.addPaths(paths, false)); // non-recursive
-		assertEquals(2, sourceParser.addPaths(paths, true)); // recursive		
-	}
-
-	@Test
-	public void testAddPathString() {
-		SourceParser sourceParser = new SourceParser();
-		
-		// Test adding a path that doesn't exist
-		assertEquals(0, sourceParser.addPath(basePath + "thisDirectoryDoesntExist"));
-		
-		// Test adding a path with all valid files
-		assertEquals(0, sourceParser.addPath(basePath + "valid"));
-		
-		// Test adding a path with all invalid files
-		assertEquals(1, sourceParser.addPath(basePath + "invalid"));
-		
-		// Test adding a path with a mix of valid and invalid files
-		assertEquals(1, sourceParser.addPath(basePath + "mixed"));
-		
-		// Test adding a path with subdirectories of a mix of valid and invalid files
-		assertEquals(2, sourceParser.addPath(basePath)); 
-	}
-
-	@Test
-	public void testAddPathStringBoolean() {
-		SourceParser sourceParser = new SourceParser();
-		
-		// Test adding a path that doesn't exist
-		assertEquals(0, sourceParser.addPath(basePath + "thisDirectoryDoesntExist", false));
-		assertEquals(0, sourceParser.addPath(basePath + "thisDirectoryDoesntExist", true));
-		
-		// Test adding a path with all valid files
-		assertEquals(0, sourceParser.addPath(basePath + "valid", false));
-		assertEquals(0, sourceParser.addPath(basePath + "valid", true));
-		
-		// Test adding a path with all invalid files
-		assertEquals(1, sourceParser.addPath(basePath + "invalid", false));
-		assertEquals(1, sourceParser.addPath(basePath + "invalid", true));
-		
-		// Test adding a path with a mix of valid and invalid files
-		assertEquals(1, sourceParser.addPath(basePath + "mixed", false));
-		assertEquals(1, sourceParser.addPath(basePath + "mixed", true));
-		
-		// Test adding a path with subdirectories of a mix of valid and invalid files
-		assertEquals(0, sourceParser.addPath(basePath, false)); // Non-recursive
-		assertEquals(2, sourceParser.addPath(basePath, true)); // Recursive
-	}
-
-	@Test
-	public void testAddFile() {
-		SourceParser sourceParser = new SourceParser();
-		
-		// Test adding a file that doesn't exist
-		assertEquals(1, sourceParser.addFile(basePath + "thisFileDoesntExist"));
-		
-		// Test adding a file that does exist but is not valid
-		assertEquals(1, sourceParser.addFile(basePath + "mixed/InvalidJavaFile.java"));
-		
-		// Test adding a file that does exist and is valid
-		assertEquals(0, sourceParser.addFile(basePath + "mixed/ValidJavaFile.java"));
-		
-		// Test re-adding a file that exists
-		assertEquals(0, sourceParser.addFile(basePath + "mixed/ValidJavaFile.java"));
+		// Test adding a path that contains the above three folders
+		sourceParser = new SourceParser();
+		assertEquals(2, sourceParser.addRootPaths(rootPath));		
+		// Test adding it twice
+		assertEquals(4, sourceParser.addRootPaths(rootPath));
 	}
 
 	@Test
 	public void testGetVariables() {
 		SourceParser sourceParser = new SourceParser();
 		
-		String file = basePath + "valid/ValidJavaFile.java";
-		assertEquals(0, sourceParser.addFile(file));
+		String file = "valid/ValidJavaFile.java";
+		assertEquals(2, sourceParser.addRootPaths(rootPath));
 		
 		// Try all the lines that have variables
 		List<String> variables = sourceParser.getVariables(file, 8); // Line 8
@@ -326,11 +91,11 @@ public class SourceParserTest {
 		variables = sourceParser.getVariables(file, 17); // One past range of file
 		assertNull(variables);		
 		variables = sourceParser.getVariables(file, 700); // Way outside range of file
-		assertNull(variables);		
+		assertNull(variables);
 		
 		// Try a file that wasn't loaded (lots of lines, just in case)
 		for (int i = 0; i < 1024; i++) {
-			variables = sourceParser.getVariables(basePath + "valid/ThisFileIsntLoaded.java", i);
+			variables = sourceParser.getVariables(rootPath + "valid/ThisFileIsntLoaded.java", i);
 			assertNull(variables);	
 		}
 	}

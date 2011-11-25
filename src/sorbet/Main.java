@@ -34,7 +34,7 @@ public class Main {
 	
 	public static SourceParser createSourceParser() {		
 		SourceParser sourceParser = new SourceParser();
-		sourceParser.addPath("../src/client");
+		sourceParser.addRootPaths("../src");
 		
 		return sourceParser;
 	}
