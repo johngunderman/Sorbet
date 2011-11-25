@@ -15,7 +15,6 @@ import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
 
-
 public class SourceParser {
 	
 	private Files files = new Files();

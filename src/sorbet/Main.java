@@ -1,10 +1,15 @@
 package sorbet;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import log.PrintLogger;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.MissingCommandException;
+import com.beust.jcommander.ParameterException;
 import com.sun.jdi.Bootstrap;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.VirtualMachineManager;
@@ -18,20 +23,46 @@ import sourceparser.SourceParser;
 public class Main {	
 	public static void main(String args[]) {
 		
+		SorbetArguments arguments = new SorbetArguments();
+		try {
+			JCommander commander = new JCommander(arguments, args);
+			commander.setProgramName("Main");
+			
+			if (arguments.help) {
+				commander.usage();
+				return;
+			}
+		} catch (MissingCommandException e) {
+			System.out.println(e.getMessage());
+			return;
+		} catch (ParameterException e) {
+			System.out.println(e.getMessage());
+			return;			
+		}
+		
 		Sorbet sorbet = new Sorbet();
 
-		sorbet.setSourceParser(createSourceParser());
+		sorbet.setSourceParser(createSourceParser(arguments.source));
 		
 		sorbet.setLogger(new PrintLogger());
 		
-		sorbet.setVirtualMachine(createVirtualMachine("client.Main", ""));
+		sorbet.setVirtualMachine(createVirtualMachine(arguments.main, arguments.arguments));
 		
 		sorbet.run();
 	}
 	
-	public static SourceParser createSourceParser() {		
+	public static SourceParser createSourceParser(List<String> sources) {		
+		StringBuilder sourcesString = new StringBuilder();
+		
+		for (String source : sources) {
+			if (sourcesString.length() != 0) {
+				sourcesString.append(File.separator);
+			}			
+			sourcesString.append(source);
+		}
+		
 		SourceParser sourceParser = new SourceParser();
-		sourceParser.addRootPaths("../src");
+		sourceParser.addRootPaths(sourcesString.toString());
 		
 		return sourceParser;
 	}
@@ -45,7 +76,9 @@ public class Main {
 		Map<String, Connector.Argument> arguments = connector.defaultArguments();
 		 	
 		arguments.get("main").setValue(main);
-		arguments.get("options").setValue(args);
+		if (args != null) {
+			arguments.get("options").setValue(args);
+		}
 		
 		try {
 			VirtualMachine vm = connector.launch(arguments);
