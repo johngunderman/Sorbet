@@ -9,9 +9,12 @@ import sourceparser.SourceParser;
 import log.Logger;
 
 import com.sun.jdi.AbsentInformationException;
+import com.sun.jdi.Field;
 import com.sun.jdi.IncompatibleThreadStateException;
 import com.sun.jdi.LocalVariable;
 import com.sun.jdi.Location;
+import com.sun.jdi.ObjectReference;
+import com.sun.jdi.ReferenceType;
 import com.sun.jdi.StackFrame;
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.Value;
@@ -45,7 +48,7 @@ public class StepEventHandler implements IEventHandler {
 		
 		for (ThreadReference ref : vm.allThreads()) {
 			StepRequest request = erm.createStepRequest(ref, StepRequest.STEP_LINE, StepRequest.STEP_INTO);
-			request.addClassFilter(MainEventHandler.CLASS_NAME);
+			request.addClassFilter("client.*");
 			request.enable();
 		}
 	}
@@ -106,14 +109,14 @@ public class StepEventHandler implements IEventHandler {
 				VariablesMap variablesMap = variablesStack.peek();
 				
 				try {
-					StackFrame frame = thread.frame(0);
+					StackFrame stackFrame = thread.frame(0);
 					
-					for (LocalVariable variable : frame.visibleVariables()) {
+					for (LocalVariable variable : stackFrame.visibleVariables()) {
 						if (variablesMap.containsKey(variable.name())) {
 							// Variable already existed
 							
 							Value oldValue = variablesMap.get(variable.name());
-							Value newValue = frame.getValue(variable);
+							Value newValue = stackFrame.getValue(variable);
 							
 							if (oldValue.equals(newValue) == false) {
 								variablesMap.put(variable.name(), newValue);
@@ -123,7 +126,7 @@ public class StepEventHandler implements IEventHandler {
 						} else {
 							// Variable was just declared
 							
-							Value newValue = frame.getValue(variable);
+							Value newValue = stackFrame.getValue(variable);
 							
 							variablesMap.put(variable.name(), newValue);
 							
@@ -132,10 +135,36 @@ public class StepEventHandler implements IEventHandler {
 					}					
 
 					System.out.println("Step in " + sourcePath + ":" + lineNumber);
-					List<String> variables = sourceParser.getVariables(sourcePath, lineNumber);
-					if (variables != null) {
-						for (String variable : variables) {
-							System.out.println("\tUsed " + variable);
+					
+					List<String> variableNames = sourceParser.getVariables(sourcePath, lineNumber);
+					
+					if (variableNames != null) {
+						for (String variableName : variableNames) {
+							
+							LocalVariable variable = stackFrame.visibleVariableByName(variableName);
+							
+							if (variable != null) {
+								// The variable was on the stack
+								
+								System.out.println("\tUsed variable " + variableName + " value: " + stackFrame.getValue(variable));
+							} else {
+								// The variable was not on the stack
+
+								Value value = null;
+																
+								ObjectReference objectReference = stackFrame.thisObject();
+								if (objectReference != null) {
+									ReferenceType referenceType = objectReference.referenceType();
+									Field field = referenceType.fieldByName(variableName);
+									value = objectReference.getValue(field);
+								}
+									
+								if (value != null) {
+									System.out.println("\tUsed variable " + variableName + " value: " + value);
+								} else {
+									System.out.println("\tUsed variable " + variableName + " value: UNKNOWN");
+								}
+							}
 						}
 					}
 					

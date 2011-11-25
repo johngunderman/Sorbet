@@ -1,8 +1,6 @@
 package sorbet;
 
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import log.PrintLogger;
@@ -16,7 +14,6 @@ import com.sun.jdi.connect.LaunchingConnector;
 import com.sun.jdi.connect.VMStartException;
 
 import sourceparser.SourceParser;
-import events.MainEventHandler;
 
 public class Main {	
 	public static void main(String args[]) {
