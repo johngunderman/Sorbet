@@ -48,6 +48,7 @@ public class StepEventHandler implements IEventHandler {
 		
 		for (ThreadReference ref : vm.allThreads()) {
 			StepRequest request = erm.createStepRequest(ref, StepRequest.STEP_LINE, StepRequest.STEP_INTO);
+			/* TODO: Change this to match what our command line params are */
 			request.addClassFilter("client.*");
 			request.enable();
 		}
@@ -158,11 +159,20 @@ public class StepEventHandler implements IEventHandler {
 									Field field = referenceType.fieldByName(variableName);
 									value = objectReference.getValue(field);
 								}
-									
+
+								// handle static fields
+								if (value == null){
+									ReferenceType referenceType = location.declaringType();
+									Field field = referenceType.fieldByName(variableName);
+									if (field != null) {
+										value = referenceType.getValue(field);
+									}
+								}
+
 								if (value != null) {
 									System.out.println("\tUsed variable " + variableName + " value: " + value);
 								} else {
-									System.out.println("\tUsed variable " + variableName + " value: UNKNOWN");
+									System.out.println("\tUsed variable " + variableName + " value: UNSET");
 								}
 							}
 						}
