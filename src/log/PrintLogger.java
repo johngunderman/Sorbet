@@ -5,7 +5,7 @@ import com.sun.jdi.Value;
 public class PrintLogger extends Logger {
 
 	@Override
-	public void logProgramStart(String programName, String userName, String args) {
+	public void logProgramStart(String programName, String args, String whitelist, String blacklist) {
 		// TODO Auto-generated method stub
 		
 	}

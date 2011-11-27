@@ -116,7 +116,7 @@ public class SQLiteLogger extends Logger {
 
 
 	@Override 
-	public void logProgramStart(String programName, String userName, String args) {
+	public void logProgramStart(String programName, String args, String whitelist, String blacklist) {
 		
 	}
 

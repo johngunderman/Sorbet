@@ -10,7 +10,7 @@ public abstract class Logger {
 		line++;
 	}
 
-	public abstract void logProgramStart(String programName, String userName, String args);
+	public abstract void logProgramStart(String programName, String args, String whitelist, String blacklist);
 
 	public abstract void logVarCreated(String value);
 
