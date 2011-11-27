@@ -172,7 +172,7 @@ public class StepEventHandler implements IEventHandler {
 								if (value != null) {
 									System.out.println("\tUsed variable " + variableName + " value: " + value);
 								} else {
-									System.out.println("\tUsed variable " + variableName + " value: UNSET");
+									System.out.println("\tUsed variable " + variableName + " value: NULL");
 								}
 							}
 						}

@@ -7,6 +7,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/tools.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry exported="true" kind="lib" path="lib/javaparser/javaparser-1.0.8.jar"/>
-	<classpathentry kind="lib" path="lib/jcommander/jcommander-1.20-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jcommander/jcommander-1.20-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
