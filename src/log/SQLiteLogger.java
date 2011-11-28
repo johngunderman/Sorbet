@@ -48,9 +48,9 @@ public class SQLiteLogger extends Logger {
 
 	private static String createVarUsed = "CREATE TABLE IF NOT EXISTS VARUSED (" +
 			"runsid INTEGER REFERENCES RUNS (runsid)," +
-			"linesid INTEGER," +
-			"varsid INTEGER," +
-			"PRIMARY KEY (runsid, linesid, varsid))";
+			"linesid INTEGER REFERENCES LINES (linesid)," +
+			"varvaluessid INTEGER REFERENCES VARS (varvaluessid)," +
+			"PRIMARY KEY (runsid, linesid, varvaluessid))";
 	
 	private static String createProgramExit = "CREATE TABLE IF NOT EXISTS PROGRAMEXIT (" +
 			"runsid INTEGER PRIMARY KEY REFERENCES RUNS (runsid)," +
@@ -79,7 +79,7 @@ public class SQLiteLogger extends Logger {
 			"VALUES (?, ?, ?)";
 
 	private static String varUsedInsert = "INSERT INTO VARUSED " +
-			"(runsid, linesid, varsid) " +
+			"(runsid, linesid, varvaluessid) " +
 			"VALUES (?, ?, ?)";
 
 	private static String programExitInsert = "INSERT INTO PROGRAMEXIT " +
