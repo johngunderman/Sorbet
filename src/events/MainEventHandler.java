@@ -13,8 +13,6 @@ import com.sun.jdi.event.VMDisconnectEvent;
 
 public class MainEventHandler implements IEventHandler {
 		
-	private ClassPrepareEventHandler classPrepareEventHandler;
-	private ModificationWatchpointEventHandler modificationWatchpointEventHandler;
 	private StepEventHandler stepEventHandler;
 	
 	private SourceParser sourceParser;
@@ -27,8 +25,6 @@ public class MainEventHandler implements IEventHandler {
 		this.logger = logger;
 		this.vm = vm;
 		
-		classPrepareEventHandler = new ClassPrepareEventHandler(sourceParser, logger, vm);
-		modificationWatchpointEventHandler = new ModificationWatchpointEventHandler(sourceParser, logger, vm);
 		stepEventHandler = new StepEventHandler(sourceParser, logger, vm);
 	}	
 
@@ -39,10 +35,6 @@ public class MainEventHandler implements IEventHandler {
 		if (event instanceof VMDeathEvent || event instanceof VMDisconnectEvent) {
 			// exit
 			return -1;
-		} else if (event instanceof ClassPrepareEvent) {
-			return classPrepareEventHandler.handle((ClassPrepareEvent)event);
-		} else if (event instanceof ModificationWatchpointEvent) {
-			return modificationWatchpointEventHandler.handle((ModificationWatchpointEvent)event);
 		} else if (event instanceof StepEvent) {
 			return stepEventHandler.handle((StepEvent)event);
 		}

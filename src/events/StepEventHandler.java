@@ -2,6 +2,7 @@ package events;
 
 import java.util.List;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 import sourceparser.SourceParser;
@@ -30,7 +31,7 @@ public class StepEventHandler implements IEventHandler {
 	private Logger logger;
 	private VirtualMachine vm;
 	
-	private ThreadsMap threads;
+	private Threads threads;
 	
 	public StepEventHandler(SourceParser sourceParser, Logger logger, VirtualMachine vm) {
 
@@ -38,7 +39,7 @@ public class StepEventHandler implements IEventHandler {
 		this.logger = logger;
 		this.vm = vm;
 		
-		this.threads = new ThreadsMap();
+		this.threads = new Threads();
 		
 		requestEvents();
 	}
@@ -62,12 +63,10 @@ public class StepEventHandler implements IEventHandler {
 		
 		String sourcePath;
 		int lineNumber;
-		String methodName; 
 		
 		try {
 			sourcePath = location.sourcePath();
 			lineNumber = location.lineNumber();
-			methodName = location.method().name();
 		} catch (AbsentInformationException e) {
 			// No location information available for this step
 			
@@ -75,147 +74,189 @@ public class StepEventHandler implements IEventHandler {
 		}
 			
 		for (ThreadReference thread : vm.allThreads()) {	
+			if (localInformationAvailable(thread) == false) {
+				continue;
+			}
+			
 			String threadName = thread.name();
 			
 			if (threads.containsKey(threadName) == false) {
-				VariablesStack variablesStack = new VariablesStack();
-				variablesStack.setLineNumber(lineNumber);
+				Steps steps = new Steps();
 				
-				threads.put(threadName, variablesStack);
+				threads.put(threadName, steps);
 			}
 			
-			int frameCount;
+			int stackDepth;
 			
 			try {
-				frameCount = thread.frameCount();
+				stackDepth = thread.frameCount();
 			} catch (IncompatibleThreadStateException e) {
 				// No stack variables available for this thread
 				
 				continue;
 			}
 			
-			VariablesStack variablesStack = threads.get(threadName);
+			Steps steps = threads.get(threadName);
 			
-			if (variablesStack.size() < frameCount) {
-				// Stack has grown so make a new VariablesMap
+			if (steps.size() < stackDepth) {
+				// Stack has grown so make a new Step
 				
-				variablesStack.push(new VariablesMap());
-			} else if (variablesStack.size() > frameCount) {
-				// Stack has shrunk so pop a VariablesMap
+				steps.push(new Step());
+			} else if (steps.size() > stackDepth) {
+				// Stack has shrunk so pop a Step
 				
-				variablesStack.pop();
+				steps.pop();
 			}
 			
-			if (frameCount > 0) {				
-				VariablesMap variablesMap = variablesStack.peek();
+			if (steps.size() > 0) {				
+				Step lastStep = steps.pop();
 				
-				try {
-					StackFrame stackFrame = thread.frame(0);
-					
-					for (LocalVariable variable : stackFrame.visibleVariables()) {
-						if (variablesMap.containsKey(variable.name())) {
-							// Variable already existed
-							
-							Value oldValue = variablesMap.get(variable.name());
-							Value newValue = stackFrame.getValue(variable);
-							
-							if (oldValue.equals(newValue) == false) {
-								variablesMap.put(variable.name(), newValue);
-								
-								logger.log(sourcePath, variablesStack.getLineNumber(), methodName, variable.name(), newValue);
-							}
-						} else {
-							// Variable was just declared
-							
-							Value newValue = stackFrame.getValue(variable);
-							
-							variablesMap.put(variable.name(), newValue);
-							
-							logger.log(sourcePath, variablesStack.getLineNumber(), methodName, variable.name(), newValue);
-						}						
-					}					
-
-					System.out.println("Step in " + sourcePath + ":" + lineNumber);
-					
-					List<String> variableNames = sourceParser.getVariables(sourcePath, lineNumber);
-					
-					if (variableNames != null) {
-						for (String variableName : variableNames) {
-							
-							LocalVariable variable = stackFrame.visibleVariableByName(variableName);
-							
-							if (variable != null) {
-								// The variable was on the stack
-								
-								System.out.println("\tUsed variable " + variableName + " value: " + stackFrame.getValue(variable));
-							} else {
-								// The variable was not on the stack
-
-								Value value = null;
-																
-								ObjectReference objectReference = stackFrame.thisObject();
-								if (objectReference != null) {
-									ReferenceType referenceType = objectReference.referenceType();
-									Field field = referenceType.fieldByName(variableName);
-									value = objectReference.getValue(field);
-								}
-
-								// handle static fields
-								if (value == null){
-									ReferenceType referenceType = location.declaringType();
-									Field field = referenceType.fieldByName(variableName);
-									if (field != null) {
-										value = referenceType.getValue(field);
-									}
-								}
-
-								if (value != null) {
-									System.out.println("\tUsed variable " + variableName + " value: " + value);
-								} else {
-									System.out.println("\tUsed variable " + variableName + " value: NULL");
-								}
-							}
+				Map<String, String> lastVariables = lastStep.getLastVariables();
+				
+				if (lastVariables != null) {
+					for (String lastVariable : lastVariables.keySet()) {
+						String lastValue = lastVariables.get(lastVariable);
+						
+						String currentValue = getValue(thread, location, lastVariable);
+						if (lastValue.equals(currentValue) == false) {
+							// TODO: log new value at step.getLastLine()
+							System.out.println("Changed " + lastVariable + " = " + currentValue);
 						}
 					}
-					
-					variablesStack.setLineNumber(lineNumber);
-				} catch (IncompatibleThreadStateException e) {
-					// No stack variables available for this thread
-					
-					continue;
-				} catch (AbsentInformationException e) {
-					// No stack variables available for this thread
-					
-					continue;
-				} 
+				}
+				
+				System.out.println("Step in " + sourcePath + ":" + lineNumber + " (thread " + thread.name() + ")");
+				
+				List<String> variables = sourceParser.getVariables(sourcePath, lineNumber);
+				Map<String, String> currentValues = new HashMap<String, String>();
+				
+				if (variables != null) {
+					for (String variable : variables) {
+						String value = getValue(thread, location, variable);
+						// TODO: log value
+						
+						currentValues.put(variable, value);
+						System.out.println("\tUsed: " + variable + " = " + value);
+					}
+				}
+				
+				Step newStep = new Step(lineNumber, currentValues);
+				steps.push(newStep);
 			}
 		}
 		
 		return 0;
 	}
 	
-	private class ThreadsMap extends HashMap<String, VariablesStack> {
+	private boolean localInformationAvailable(ThreadReference thread) {
+		try {
+			if (thread.frameCount() > 0) {
+				StackFrame stackFrame = thread.frame(0);
+				
+				stackFrame.visibleVariables();
+				
+				return true;
+			} else {
+				return false;
+			}
+		} catch (AbsentInformationException e) {
+			return false;
+		} catch (IncompatibleThreadStateException e) {
+			return false;
+		}
+	}
+	
+	private String getValue(ThreadReference thread, Location location, String variableName) {		
+		StackFrame stackFrame;
+		try {
+			stackFrame = thread.frame(0);
+		} catch (IncompatibleThreadStateException e1) {
+			// TODO Auto-generated catch block			
+
+			return "null";
+		}
+		
+		LocalVariable variable;
+		try {
+			variable = stackFrame.visibleVariableByName(variableName);
+		} catch (AbsentInformationException e) {
+			// TODO Auto-generated catch block
+			
+			return "null";
+		}
+		
+		if (variable != null) {
+			// The variable was on the stack
+			
+			return stackFrame.getValue(variable).toString();
+		} else {
+			// The variable was not on the stack
+
+			Value value = null;
+											
+			ObjectReference objectReference = stackFrame.thisObject();
+			if (objectReference != null) {
+				ReferenceType referenceType = objectReference.referenceType();
+				Field field = referenceType.fieldByName(variableName);
+				value = objectReference.getValue(field);
+			}
+
+			// handle static fields
+			if (value == null){
+				ReferenceType referenceType = location.declaringType();
+				Field field = referenceType.fieldByName(variableName);
+				if (field != null) {
+					value = referenceType.getValue(field);
+				}
+			}
+
+			if (value != null) {
+				return value.toString();
+			} else {
+				return "null"; // TODO: This returns null for static fields outside the current class as well...
+			}
+		}
+	}
+	
+	private class Threads extends HashMap<String, Steps> {
 
 		private static final long serialVersionUID = -58718752877349620L;
 	}
 	
-	private class VariablesStack extends Stack<VariablesMap> {
+	private class Steps extends Stack<Step> {
 
 		private static final long serialVersionUID = -7640570711643014510L;
-		
-		private int lineNumber;
-		
-		public int getLineNumber() {
-			return lineNumber;
-		}
-		
-		public void setLineNumber(int lineNumber) {
-			this.lineNumber = lineNumber;
-		}
 	}
 	
-	private class VariablesMap extends HashMap<String, Value> {
+	private class Step {
 
-		private static final long serialVersionUID = 6201778837494415462L;	
+		private int lastLine;
+		private Map<String, String> lastVariables; // TODO: Clean this up so that it just needs to be lastVariable
+		
+		public Step() {
+			lastLine = -1;
+			lastVariables = null;
+		}
+		
+		public Step(int lastLine, Map<String, String> lastVariables) {
+			this.lastLine = lastLine;
+			this.lastVariables = lastVariables;
+		}
+		
+		public int getLastLine() {
+			return lastLine;
+		}
+		
+		public void setLastLine(int lastLine) {
+			this.lastLine = lastLine;
+		}
+		
+		public Map<String, String> getLastVariables() {
+			return lastVariables;
+		}
+		
+		public void setLastVariables(Map<String, String> lastVariables) {
+			this.lastVariables = lastVariables;
+		}
 	}
 }
