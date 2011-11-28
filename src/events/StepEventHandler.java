@@ -116,29 +116,28 @@ public class StepEventHandler implements IEventHandler {
 				
 				Map<String, String> lastVariables = lastStep.getLastVariables();
 				
+				// Check used variables from the last step to check for changes
 				if (lastVariables != null) {
 					for (String lastVariable : lastVariables.keySet()) {
-						String lastValue = lastVariables.get(lastVariable);
-						
+						String lastValue = lastVariables.get(lastVariable);						
 						String currentValue = getValue(thread, location, lastVariable);
+						
 						if (lastValue.equals(currentValue) == false) {
-							System.out.println("Changed " + lastVariable + " = " + currentValue);
 							logger.logVarChanged(lastVariable, currentValue);
 						}
 					}
 				}
 				
-				System.out.println("Step in " + sourcePath + ":" + lineNumber + " (thread " + thread.name() + ")");
-				
+				// Log step event
 				logger.logLines(sourcePath, lineNumber);
 				
+				// Log used variables and record their values
 				List<String> variables = sourceParser.getVariables(sourcePath, lineNumber);
 				Map<String, String> currentValues = new HashMap<String, String>();
 				
 				if (variables != null) {
 					for (String variable : variables) {
 						if (knownVariables.add(variable)) {
-							System.out.println("\tCreated " + variable);
 							logger.logVarCreated(variable, "woah type");
 						}
 						
@@ -146,11 +145,11 @@ public class StepEventHandler implements IEventHandler {
 						
 						currentValues.put(variable, value);
 						
-						System.out.println("\tUsed: " + variable + " = " + value);
 						logger.logVarUsed(variable);
 					}
 				}
 				
+				// Push the new step
 				Step newStep = new Step(knownVariables, lineNumber, currentValues);
 				steps.push(newStep);
 			}

@@ -89,7 +89,7 @@ public class Main {
 	}
 	
 	public static Logger createLogger(String main, String args, String whitelist, String blacklist) {
-		Logger logger = new SQLiteLogger();
+		Logger logger = new PrintLogger();
 		logger.logProgramStart(main, args, whitelist, blacklist);
 		return logger;
 	}
