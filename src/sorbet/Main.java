@@ -72,6 +72,10 @@ public class Main {
 	private static String flattenList(List<String> list) {
 		// TODO: Fix up the regex for this
 		
+		if (list == null) {
+			return "";
+		}
+		
 		StringBuilder flat = new StringBuilder();
 		
 		for (String s : list) {

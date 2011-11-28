@@ -100,12 +100,12 @@ public class SQLiteLogger extends Logger {
 			Class.forName("org.sqlite.JDBC");
 			conn = DriverManager.getConnection("jdbc:sqlite:sorbet_out.db");
 			Statement stmt = conn.createStatement();
-			stmt.addBatch(createLines);
 			stmt.addBatch(createRuns);
-			stmt.addBatch(createVarDeath);
-			stmt.addBatch(createVarUsed);
-			stmt.addBatch(createVarValues);
+			stmt.addBatch(createLines);
 			stmt.addBatch(createVars);
+			stmt.addBatch(createVarValues);
+			stmt.addBatch(createVarUsed);
+			stmt.addBatch(createVarDeath);
 			stmt.executeBatch();
 
 		} catch (SQLException e) {
@@ -123,10 +123,10 @@ public class SQLiteLogger extends Logger {
 	public void logProgramStart(String programName, String args, String whitelist, String blacklist) {
 		try {
 			PreparedStatement prep = conn.prepareStatement(runsInsert);
-			prep.setString(0, programName);
-			prep.setString(1, args);
-			prep.setString(2, whitelist);
-			prep.setString(3, blacklist);
+			prep.setString(1, programName);
+			prep.setString(2, args);
+			prep.setString(3, whitelist);
+			prep.setString(4, blacklist);
 
 			prep.execute();
 
@@ -149,11 +149,11 @@ public class SQLiteLogger extends Logger {
 	public void logVarCreated(String name, String type) {
 		try {
 			PreparedStatement prep = conn.prepareStatement(varInsert);
-			prep.setInt(0, runId);
-			prep.setInt(1, varCounter);
-			prep.setInt(2, line);
-			prep.setString(3, name);
-			prep.setString(4, type);
+			prep.setInt(1, runId);
+			prep.setInt(2, varCounter);
+			prep.setInt(3, line);
+			prep.setString(4, name);
+			prep.setString(5, type);
 
 			prep.execute();
 
@@ -169,10 +169,10 @@ public class SQLiteLogger extends Logger {
 	public void logVarChanged(String var, String value) {
 		try {
 			PreparedStatement prep = conn.prepareStatement(varValuesInsert);
-			prep.setInt(0, runId);
-			prep.setInt(1, availableVars.get(var));
-			prep.setInt(2, line);
-			prep.setString(3, value);
+			prep.setInt(1, runId);
+			prep.setInt(2, availableVars.get(var));
+			prep.setInt(3, line);
+			prep.setString(4, value);
 
 			prep.execute();
 
@@ -186,9 +186,9 @@ public class SQLiteLogger extends Logger {
 	public void logVarDeath(String var) {
 		try {
 			PreparedStatement prep = conn.prepareStatement(varDeathInsert);
-			prep.setInt(0, runId);
-			prep.setInt(1, availableVars.get(var));
-			prep.setInt(2, line);
+			prep.setInt(1, runId);
+			prep.setInt(2, availableVars.get(var));
+			prep.setInt(3, line);
 
 			prep.execute();
 
@@ -204,9 +204,9 @@ public class SQLiteLogger extends Logger {
 	public void logVarUsed(String var) {
 		try {
 			PreparedStatement prep = conn.prepareStatement(varUsedInsert);
-			prep.setInt(0, runId);
-			prep.setInt(1, availableVars.get(var));
-			prep.setInt(2, line);
+			prep.setInt(1, runId);
+			prep.setInt(2, availableVars.get(var));
+			prep.setInt(3, line);
 
 			prep.execute();
 
@@ -220,9 +220,9 @@ public class SQLiteLogger extends Logger {
 	public void logProgramExit(int exitCode, String exception) {
 		try {
 			PreparedStatement prep = conn.prepareStatement(varInsert);
-			prep.setInt(0, runId);
-			prep.setInt(1, exitCode);
-			prep.setString(2, exception);
+			prep.setInt(1, runId);
+			prep.setInt(2, exitCode);
+			prep.setString(3, exception);
 
 			prep.execute();
 
@@ -234,11 +234,13 @@ public class SQLiteLogger extends Logger {
 
 	@Override
 	public void logLines(String filePath, int lineNum) {
+		nextLine();
+		
 		try {
 			PreparedStatement prep = conn.prepareStatement(varInsert);
-			prep.setInt(0, runId);
-			prep.setString(1, filePath);
-			prep.setInt(2, lineNum);
+			prep.setInt(1, runId);
+			prep.setString(2, filePath);
+			prep.setInt(3, lineNum);
 
 			prep.execute();
 

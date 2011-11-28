@@ -1,8 +1,10 @@
 package events;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 import sourceparser.SourceParser;
@@ -110,6 +112,7 @@ public class StepEventHandler implements IEventHandler {
 			
 			if (steps.size() > 0) {				
 				Step lastStep = steps.pop();
+				Set<String> knownVariables = lastStep.getKnownVariables();
 				
 				Map<String, String> lastVariables = lastStep.getLastVariables();
 				
@@ -119,28 +122,36 @@ public class StepEventHandler implements IEventHandler {
 						
 						String currentValue = getValue(thread, location, lastVariable);
 						if (lastValue.equals(currentValue) == false) {
-							// TODO: log new value at step.getLastLine()
 							System.out.println("Changed " + lastVariable + " = " + currentValue);
+							logger.logVarChanged(lastVariable, currentValue);
 						}
 					}
 				}
 				
 				System.out.println("Step in " + sourcePath + ":" + lineNumber + " (thread " + thread.name() + ")");
 				
+				logger.logLines(sourcePath, lineNumber);
+				
 				List<String> variables = sourceParser.getVariables(sourcePath, lineNumber);
 				Map<String, String> currentValues = new HashMap<String, String>();
 				
 				if (variables != null) {
 					for (String variable : variables) {
+						if (knownVariables.add(variable)) {
+							System.out.println("\tCreated " + variable);
+							logger.logVarCreated(variable, "woah type");
+						}
+						
 						String value = getValue(thread, location, variable);
-						// TODO: log value
 						
 						currentValues.put(variable, value);
+						
 						System.out.println("\tUsed: " + variable + " = " + value);
+						logger.logVarUsed(variable);
 					}
 				}
 				
-				Step newStep = new Step(lineNumber, currentValues);
+				Step newStep = new Step(knownVariables, lineNumber, currentValues);
 				steps.push(newStep);
 			}
 		}
@@ -230,33 +241,35 @@ public class StepEventHandler implements IEventHandler {
 	
 	private class Step {
 
+		private Set<String> knownVariables;
+		
 		private int lastLine;
 		private Map<String, String> lastVariables; // TODO: Clean this up so that it just needs to be lastVariable
 		
 		public Step() {
+			knownVariables = new HashSet<String>();
+			
 			lastLine = -1;
 			lastVariables = null;
 		}
 		
-		public Step(int lastLine, Map<String, String> lastVariables) {
+		public Step(Set<String> knownVariables, int lastLine, Map<String, String> lastVariables) {
+			this.knownVariables = knownVariables;
+			
 			this.lastLine = lastLine;
 			this.lastVariables = lastVariables;
+		}
+		
+		public Set<String> getKnownVariables() {
+			return knownVariables;
 		}
 		
 		public int getLastLine() {
 			return lastLine;
 		}
 		
-		public void setLastLine(int lastLine) {
-			this.lastLine = lastLine;
-		}
-		
 		public Map<String, String> getLastVariables() {
 			return lastVariables;
-		}
-		
-		public void setLastVariables(Map<String, String> lastVariables) {
-			this.lastVariables = lastVariables;
 		}
 	}
 }
