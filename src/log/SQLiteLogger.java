@@ -92,6 +92,8 @@ public class SQLiteLogger extends Logger {
 	private Connection conn;
 	private int runId;
 
+	private int varValuesId;
+
 	public SQLiteLogger() {
 		// initialize db, make sure we exist
 
@@ -133,10 +135,11 @@ public class SQLiteLogger extends Logger {
 			prep.execute();
 
 			Statement stat = conn.createStatement();
-			ResultSet rs = stat.executeQuery("SELECT runid FROM RUNS ORDER DESC LIMIT 1");
+			ResultSet rs = stat.executeQuery("SELECT runsid FROM RUNS ORDER BY runsid DESC LIMIT 1");
 
-			runId = rs.getInt("runid");
+			runId = rs.getInt("runsid");
 			line = 0;
+			varValuesId = 0;
 
 			rs.close();
 
@@ -158,8 +161,8 @@ public class SQLiteLogger extends Logger {
 			prep.setString(5, type);
 
 			prep.execute();
-
-			availableVars.put(name, varCounter);
+			
+			varCounter++;
 
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -172,11 +175,15 @@ public class SQLiteLogger extends Logger {
 		try {
 			PreparedStatement prep = conn.prepareStatement(varValuesInsert);
 			prep.setInt(1, runId);
-			prep.setInt(2, availableVars.get(var));
-			prep.setInt(3, line);
-			prep.setString(4, value);
+			prep.setInt(2, varValuesId);
+			prep.setInt(3, varCounter);
+			prep.setInt(4, line);
+			prep.setString(5, value);
 
 			prep.execute();
+
+			availableVars.put(var, varValuesId);
+
 
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -207,8 +214,8 @@ public class SQLiteLogger extends Logger {
 		try {
 			PreparedStatement prep = conn.prepareStatement(varUsedInsert);
 			prep.setInt(1, runId);
-			prep.setInt(2, availableVars.get(var));
-			prep.setInt(3, line);
+			prep.setInt(2, line);
+			prep.setInt(3, availableVars.get(var));
 
 			prep.execute();
 
@@ -236,16 +243,19 @@ public class SQLiteLogger extends Logger {
 
 	@Override
 	public void logLines(String filePath, int lineNum) {
-		nextLine();
 		
 		try {
-			PreparedStatement prep = conn.prepareStatement(varInsert);
+			PreparedStatement prep = conn.prepareStatement(linesInsert);
 			prep.setInt(1, runId);
-			prep.setString(2, filePath);
-			prep.setInt(3, lineNum);
+			prep.setInt(2, line);
+			prep.setString(3, filePath);
+			prep.setInt(4, lineNum);
+			prep.setString(5, new Long(System.nanoTime()).toString());
 
 			prep.execute();
 
+			nextLine();
+			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
