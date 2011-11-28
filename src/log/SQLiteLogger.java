@@ -2,6 +2,7 @@ package log;
 
 import com.sun.jdi.Value;
 import java.sql.*;
+import java.util.HashMap;
 
 public class SQLiteLogger extends Logger {
 
@@ -86,11 +87,17 @@ public class SQLiteLogger extends Logger {
 			"(runsid, exitcode, exception) " +
 			"VALUES (?, ?, ?)";
 
-
+	private HashMap<String,Integer> availableVars;
+	private int varCounter;
+	
+	private Connection conn;
+	private int runId;
+	
 	public SQLiteLogger() {
 		// initialize db, make sure we exist
-		Connection conn;
-
+		
+		availableVars = new HashMap<String, Integer>();
+		
 		try {
 			Class.forName("org.sqlite.JDBC");
 			conn = DriverManager.getConnection("jdbc:sqlite:sorbet_out.db");
@@ -112,17 +119,52 @@ public class SQLiteLogger extends Logger {
 		}
 
 	}
-
-
+	
 
 	@Override 
 	public void logProgramStart(String programName, String args, String whitelist, String blacklist) {
+		try {
+			PreparedStatement prep = conn.prepareStatement(runsInsert);
+			prep.setString(0, programName);
+			prep.setString(1, args);
+			prep.setString(2, whitelist);
+			prep.setString(3, blacklist);
+			
+			prep.execute();
+			
+			Statement stat = conn.createStatement();
+			ResultSet rs = stat.executeQuery("SELECT runid FROM RUNS ORDER DESC LIMIT 1");
+			
+			runId = rs.getInt("runid");
+			line = 0;
+
+			rs.close();
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 
 	@Override
-	public void logVarCreated(String value) {
-
+	public void logVarCreated(String name, String type) {
+		try {
+			PreparedStatement prep = conn.prepareStatement(varInsert);
+			prep.setInt(0, runId);
+			prep.setInt(1, varCounter);
+			prep.setInt(2, line);
+			prep.setString(3, name);
+			prep.setString(4, type);
+			
+			prep.execute();
+			
+			availableVars.put(name, varCounter);
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -141,13 +183,35 @@ public class SQLiteLogger extends Logger {
 	}
 
 	@Override
-	public void logProgramExit(int runId, int exitCode, String exception) {
-
+	public void logProgramExit(int exitCode, String exception) {
+		try {
+			PreparedStatement prep = conn.prepareStatement(varInsert);
+			prep.setInt(0, runId);
+			prep.setInt(1, exitCode);
+			prep.setString(2, exception);
+			
+			prep.execute();
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
-	public void logLines(int runId, String filePath, int lineNum) {
-
+	public void logLines(String filePath, int lineNum) {
+		try {
+			PreparedStatement prep = conn.prepareStatement(varInsert);
+			prep.setInt(0, runId);
+			prep.setString(1, filePath);
+			prep.setInt(2, lineNum);
+			
+			prep.execute();
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

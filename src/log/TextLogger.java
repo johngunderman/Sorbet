@@ -11,7 +11,7 @@ public class TextLogger extends Logger {
 	}
 
 	@Override
-	public void logVarCreated(String value) {
+	public void logVarCreated(String name, String type) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -35,13 +35,13 @@ public class TextLogger extends Logger {
 	}
 
 	@Override
-	public void logProgramExit(int runId, int exitCode, String exception) {
+	public void logProgramExit(int exitCode, String exception) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void logLines(int runId, String filePath, int lineNum) {
+	public void logLines(String filePath, int lineNum) {
 		// TODO Auto-generated method stub
 		
 	}

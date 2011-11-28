@@ -4,7 +4,7 @@ import com.sun.jdi.Value;
 
 public abstract class Logger {
 
-	private int line = 0;
+	protected int line = 0;
 	
 	void nextLine() {
 		line++;
@@ -12,7 +12,7 @@ public abstract class Logger {
 
 	public abstract void logProgramStart(String programName, String args, String whitelist, String blacklist);
 
-	public abstract void logVarCreated(String value);
+	public abstract void logVarCreated(String name, String type);
 
 	public abstract void logVarChanged(String var, String value);
 
@@ -20,8 +20,8 @@ public abstract class Logger {
 
 	public abstract void logVarUsed(String var);
 
-	public abstract void logProgramExit(int runId, int exitCode, String exception);
+	public abstract void logProgramExit(int exitCode, String exception);
 
-	public abstract void logLines(int runId, String filePath, int lineNum);
+	public abstract void logLines(String filePath, int lineNum);
 		
 }
