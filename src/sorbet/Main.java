@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import log.Logger;
 import log.PrintLogger;
+import log.SQLiteLogger;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.MissingCommandException;
@@ -26,7 +28,7 @@ public class Main {
 		SorbetArguments arguments = new SorbetArguments();
 		try {
 			JCommander commander = new JCommander(arguments, args);
-			commander.setProgramName("Main");
+			commander.setProgramName("Sorbet");
 			
 			if (arguments.help) {
 				commander.usage();
@@ -44,7 +46,7 @@ public class Main {
 
 		sorbet.setSourceParser(createSourceParser(arguments.source));
 		
-		sorbet.setLogger(new PrintLogger());
+		sorbet.setLogger(createLogger(arguments.main, arguments.arguments, flattenList(arguments.whitelist), flattenList(arguments.blacklist)));
 		
 		sorbet.setVirtualMachine(createVirtualMachine(arguments.main, arguments.arguments));
 		
@@ -65,6 +67,27 @@ public class Main {
 		sourceParser.addRootPaths(sourcesString.toString());
 		
 		return sourceParser;
+	}
+	
+	private static String flattenList(List<String> list) {
+		// TODO: Fix up the regex for this
+		
+		StringBuilder flat = new StringBuilder();
+		
+		for (String s : list) {
+			if (flat.length() != 0) {
+				flat.append(" AND ");
+			}
+			flat.append(s);
+		}
+		
+		return flat.toString();
+	}
+	
+	public static Logger createLogger(String main, String args, String whitelist, String blacklist) {
+		Logger logger = new SQLiteLogger();
+		logger.logProgramStart(main, args, whitelist, blacklist);
+		return logger;
 	}
 	
 	public static VirtualMachine createVirtualMachine(String main, String args) {
