@@ -50,8 +50,9 @@ public class SQLiteLogger extends Logger {
 			"runsid INTEGER REFERENCES RUNS (runsid)," +
 			"linesid INTEGER," +
 			"varsid INTEGER," +
-			"PRIMARY KEY (runsid, linesid, varsid))" +
-			"CREATE TABLE IF NOT EXISTS PROGRAMEXIT (" +
+			"PRIMARY KEY (runsid, linesid, varsid))";
+	
+	private static String createProgramExit = "CREATE TABLE IF NOT EXISTS PROGRAMEXIT (" +
 			"runsid INTEGER PRIMARY KEY REFERENCES RUNS (runsid)," +
 			"exitcode INTEGER," +
 			"exception TEXT)";
@@ -106,6 +107,7 @@ public class SQLiteLogger extends Logger {
 			stmt.addBatch(createVarValues);
 			stmt.addBatch(createVarUsed);
 			stmt.addBatch(createVarDeath);
+			stmt.addBatch(createProgramExit);
 			stmt.executeBatch();
 
 		} catch (SQLException e) {
