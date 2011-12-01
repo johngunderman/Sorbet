@@ -134,7 +134,23 @@ public class StepEventHandler implements IEventHandler {
 				if (variables != null) {
 					for (String variable : variables) {
 						if (knownVariables.add(variable)) {
-							logger.logVarCreated(variable, "woah type");
+							
+							String type = "UNKNOWN";
+							LocalVariable lv = null;
+							try {
+								lv = thread.frame(0).visibleVariableByName(variable);
+								if (lv != null) {
+									type = lv.typeName();
+								}
+							} catch (AbsentInformationException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IncompatibleThreadStateException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+
+							logger.logVarCreated(variable, type );
 						}
 						
 						String value = getValue(thread, location, variable);
