@@ -222,6 +222,9 @@ public class SQLiteLogger extends Logger {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (NullPointerException e) {
+			// TODO Variable doens't exit, just move on?
+			return;
 		}
 	}
 

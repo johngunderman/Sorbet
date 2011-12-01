@@ -75,18 +75,8 @@ public class StepEventHandler implements IEventHandler {
 			return 0;
 		}
 			
-		for (ThreadReference thread : vm.allThreads()) {	
-			if (localInformationAvailable(thread) == false) {
-				continue;
-			}
-			
+		for (ThreadReference thread : vm.allThreads()) {					
 			String threadName = thread.name();
-			
-			if (threads.containsKey(threadName) == false) {
-				Steps steps = new Steps();
-				
-				threads.put(threadName, steps);
-			}
 			
 			int stackDepth;
 			
@@ -96,6 +86,12 @@ public class StepEventHandler implements IEventHandler {
 				// No stack variables available for this thread
 				
 				continue;
+			}
+			
+			if (threads.containsKey(threadName) == false) {
+				Steps steps = new Steps();
+				
+				threads.put(threadName, steps);
 			}
 			
 			Steps steps = threads.get(threadName);
@@ -156,24 +152,6 @@ public class StepEventHandler implements IEventHandler {
 		}
 		
 		return 0;
-	}
-	
-	private boolean localInformationAvailable(ThreadReference thread) {
-		try {
-			if (thread.frameCount() > 0) {
-				StackFrame stackFrame = thread.frame(0);
-				
-				stackFrame.visibleVariables();
-				
-				return true;
-			} else {
-				return false;
-			}
-		} catch (AbsentInformationException e) {
-			return false;
-		} catch (IncompatibleThreadStateException e) {
-			return false;
-		}
 	}
 	
 	private String getValue(ThreadReference thread, Location location, String variableName) {		
