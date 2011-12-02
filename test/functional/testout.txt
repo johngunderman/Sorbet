@@ -1,0 +1,267 @@
+Program started with name [client.Main] and args [null]
+Whitelist: 
+Blacklist: 
+=============================
+Executing: client/Main.java:5
+Variable created: [UNKNOWN] foo
+Var Used: foo
+Executing: client/Main.java:5
+Variable created: [UNKNOWN] foo
+Var Used: foo
+Executing: client/Main.java:5
+Variable created: [UNKNOWN] foo
+Var Used: foo
+Executing: client/Main.java:6
+Variable created: [UNKNOWN] foobar
+Var Used: foobar
+Executing: client/Main.java:6
+Variable created: [UNKNOWN] foobar
+Var Used: foobar
+Executing: client/Main.java:6
+Variable created: [UNKNOWN] foobar
+Var Used: foobar
+Executing: client/Main.java:3
+Executing: client/Main.java:3
+>>> foobar = 9
+Executing: client/Main.java:3
+Executing: client/Main.java:10
+Variable created: [UNKNOWN] foo
+Var Used: foo
+Executing: client/Main.java:10
+Variable created: [UNKNOWN] foo
+Var Used: foo
+Executing: client/Main.java:10
+Var Used: foo
+Executing: client/Main.java:12
+Variable created: [UNKNOWN] b
+Var Used: b
+Executing: client/Main.java:12
+Variable created: [UNKNOWN] b
+Var Used: b
+>>> foo = 6
+Executing: client/Main.java:12
+Variable created: [UNKNOWN] b
+Var Used: b
+Executing: client/Main.java:14
+Variable created: [UNKNOWN] a
+Var Used: a
+Executing: client/Main.java:14
+Variable created: [UNKNOWN] a
+Var Used: a
+>>> b = 2
+Executing: client/Main.java:14
+Variable created: [UNKNOWN] a
+Var Used: a
+Executing: client/Main.java:15
+Var Used: foo
+Executing: client/Main.java:15
+Var Used: foo
+>>> a = 0
+Executing: client/Main.java:15
+Var Used: foo
+Executing: client/Main.java:16
+Var Used: b
+Executing: client/Main.java:16
+Var Used: b
+>>> foo = 7
+Executing: client/Main.java:16
+Var Used: b
+Executing: client/Main.java:14
+Var Used: a
+Executing: client/Main.java:14
+Var Used: a
+>>> b = 3
+Executing: client/Main.java:14
+Var Used: a
+Executing: client/Main.java:15
+Var Used: foo
+Executing: client/Main.java:15
+Var Used: foo
+>>> a = 1
+Executing: client/Main.java:15
+Var Used: foo
+Executing: client/Main.java:16
+Var Used: b
+Executing: client/Main.java:16
+Var Used: b
+>>> foo = 8
+Executing: client/Main.java:16
+Var Used: b
+Executing: client/Main.java:14
+Var Used: a
+Executing: client/Main.java:14
+Var Used: a
+>>> b = 4
+Executing: client/Main.java:14
+Var Used: a
+Executing: client/Main.java:19
+Variable created: [UNKNOWN] foobar
+Var Used: foobar
+Executing: client/Main.java:19
+Variable created: [UNKNOWN] foobar
+Var Used: foobar
+>>> a = null
+Executing: client/Main.java:19
+Var Used: foobar
+Executing: client/Main.java:21
+Variable created: [UNKNOWN] i
+Var Used: i
+Executing: client/Main.java:21
+Variable created: [UNKNOWN] i
+Var Used: i
+>>> foobar = 8
+Executing: client/Main.java:21
+Variable created: [UNKNOWN] i
+Var Used: i
+Executing: client/Main.java:22
+Variable created: [UNKNOWN] j
+Var Used: j
+Executing: client/Main.java:22
+Variable created: [UNKNOWN] j
+Var Used: j
+>>> i = "hi!"
+Executing: client/Main.java:22
+Variable created: [UNKNOWN] j
+Var Used: j
+Executing: client/Main.java:24
+Executing: client/Main.java:24
+>>> j = 0
+Executing: client/Main.java:24
+Executing: client/Main.java:46
+Var Used: i
+Executing: client/Main.java:46
+Var Used: i
+Executing: client/Main.java:46
+Variable created: [UNKNOWN] i
+Var Used: i
+Executing: client/Main.java:48
+Var Used: j
+Executing: client/Main.java:48
+Var Used: j
+>>> i = 2
+Executing: client/Main.java:48
+Variable created: [UNKNOWN] j
+Var Used: j
+Executing: client/Main.java:50
+Var Used: foobar
+Var Used: i
+Var Used: j
+Executing: client/Main.java:50
+Var Used: foobar
+Var Used: i
+Var Used: j
+>>> j = 6
+Executing: client/Main.java:50
+Variable created: [UNKNOWN] foobar
+Var Used: foobar
+Var Used: i
+Var Used: j
+Executing: client/Main.java:51
+Executing: client/Main.java:51
+>>> foobar = 16
+Executing: client/Main.java:51
+Executing: client/Main.java:26
+Var Used: foo
+Executing: client/Main.java:26
+Var Used: foo
+Executing: client/Main.java:26
+Var Used: foo
+Executing: client/Main.java:28
+Var Used: foo
+Executing: client/Main.java:28
+Var Used: foo
+>>> foo = 5
+Executing: client/Main.java:28
+Var Used: foo
+Executing: client/Main.java:37
+Variable created: [UNKNOWN] randomVariableOne
+Var Used: randomVariableOne
+Variable created: [UNKNOWN] Math
+Var Used: Math
+Executing: client/Main.java:37
+Variable created: [UNKNOWN] randomVariableOne
+Var Used: randomVariableOne
+Variable created: [UNKNOWN] Math
+Var Used: Math
+>>> foo = 10
+Executing: client/Main.java:37
+Variable created: [UNKNOWN] randomVariableOne
+Var Used: randomVariableOne
+Variable created: [UNKNOWN] Math
+Var Used: Math
+Executing: client/Main.java:38
+Variable created: [UNKNOWN] randomVariableTwo
+Var Used: randomVariableTwo
+Var Used: Math
+Executing: client/Main.java:38
+Variable created: [UNKNOWN] randomVariableTwo
+Var Used: randomVariableTwo
+Var Used: Math
+>>> randomVariableOne = 0.4367421163110238
+Executing: client/Main.java:38
+Variable created: [UNKNOWN] randomVariableTwo
+Var Used: randomVariableTwo
+Var Used: Math
+Executing: client/Main.java:40
+Variable created: [UNKNOWN] test
+Var Used: test
+Executing: client/Main.java:40
+Variable created: [UNKNOWN] test
+Var Used: test
+>>> randomVariableTwo = 0.3812535345128554
+Executing: client/Main.java:40
+Variable created: [UNKNOWN] test
+Var Used: test
+Executing: client/Test.java:3
+Executing: client/Test.java:3
+Executing: client/Test.java:3
+Executing: client/Test.java:4
+Var Used: test
+Executing: client/Test.java:4
+Var Used: test
+Executing: client/Test.java:4
+Variable created: [UNKNOWN] test
+Var Used: test
+Executing: client/Test.java:3
+Executing: client/Test.java:3
+>>> test = 6
+Executing: client/Test.java:3
+Executing: client/Main.java:40
+Var Used: test
+Executing: client/Main.java:40
+Var Used: test
+Executing: client/Main.java:40
+Var Used: test
+Executing: client/Main.java:42
+Variable created: [UNKNOWN] System
+Var Used: System
+Var Used: test
+Executing: client/Main.java:42
+Variable created: [UNKNOWN] System
+Var Used: System
+Var Used: test
+>>> test = instance of client.Test(id=64)
+Executing: client/Main.java:42
+Variable created: [UNKNOWN] System
+Var Used: System
+Var Used: test
+Executing: client/Test.java:7
+Var Used: test
+Executing: client/Test.java:7
+Var Used: test
+Executing: client/Test.java:7
+Variable created: [UNKNOWN] test
+Var Used: test
+Executing: client/Main.java:42
+Var Used: System
+Var Used: test
+Executing: client/Main.java:42
+Var Used: System
+Var Used: test
+Executing: client/Main.java:42
+Var Used: System
+Var Used: test
+Executing: client/Main.java:43
+Executing: client/Main.java:43
+Executing: client/Main.java:43
+Client program 6
