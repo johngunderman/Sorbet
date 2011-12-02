@@ -7,6 +7,8 @@ import log.Logger;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.event.Event;
 import com.sun.jdi.event.EventSet;
+import com.sun.jdi.event.VMDeathEvent;
+import com.sun.jdi.event.VMDisconnectEvent;
 
 public class Sorbet {
 	
@@ -39,14 +41,17 @@ public class Sorbet {
 		while (true) {
 			try {
 				EventSet eventSet = vm.eventQueue().remove();
+				
 				for (Event event : eventSet) {
-					if (stepEventHandler.handle(event) == -1) {
+					if (event instanceof VMDeathEvent || event instanceof VMDisconnectEvent) {
+						// exit
 						return;
-					}
+					} 
 					
+					stepEventHandler.handle(event);					
 				}
 					
-				eventSet.resume();				
+				eventSet.resume();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
