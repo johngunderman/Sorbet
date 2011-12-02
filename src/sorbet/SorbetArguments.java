@@ -2,7 +2,9 @@ package sorbet;
 
 import java.util.List;
 
+import com.beust.jcommander.IParameterValidator;
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.internal.Lists;
 
 public class SorbetArguments {
@@ -27,8 +29,8 @@ public class SorbetArguments {
 	@Parameter(names = "--whitelist", description = "Regular expressions for classes to white-list for profiling")
 	public List<String> whitelist;
 	
-	@Parameter(names = "--output", description = "Output logging to use")
-	public String output;
+	@Parameter(names = "--logger", description = "Output logging to use.  Valid loggers are console and sqlite.", validateWith = ValidLogger.class)
+	public String logger = "console";
 	
 	@Parameter(names = "--help", description = "Print this screen and exit")
 	public boolean help;

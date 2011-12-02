@@ -46,7 +46,7 @@ public class Main {
 
 		sorbet.setSourceParser(createSourceParser(arguments.source));
 		
-		sorbet.setLogger(createLogger(arguments.main, arguments.arguments, flattenList(arguments.whitelist), flattenList(arguments.blacklist)));
+		sorbet.setLogger(createLogger(arguments.logger, arguments.main, arguments.arguments, flattenList(arguments.whitelist), flattenList(arguments.blacklist)));
 		
 		sorbet.setVirtualMachine(createVirtualMachine(arguments.main, arguments.arguments));
 		
@@ -88,9 +88,19 @@ public class Main {
 		return flat.toString();
 	}
 	
-	public static Logger createLogger(String main, String args, String whitelist, String blacklist) {
-		Logger logger = new SQLiteLogger();
-		logger.logProgramStart(main, args, whitelist, blacklist);
+	public static Logger createLogger(String loggerName, String main, String args, String whitelist, String blacklist) {
+		Logger logger = null;
+		
+		if (loggerName.equals("console")) {
+			logger = new PrintLogger();
+		} else if (loggerName.equals("sqlite")) {
+			logger = new SQLiteLogger();
+		}
+		
+		if (logger != null) {
+			logger.logProgramStart(main, args, whitelist, blacklist);
+		}
+		
 		return logger;
 	}
 	
