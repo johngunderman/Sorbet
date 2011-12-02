@@ -1,7 +1,5 @@
 package log;
 
-import com.sun.jdi.Value;
-
 public class TextLogger extends Logger {
 
 	@Override

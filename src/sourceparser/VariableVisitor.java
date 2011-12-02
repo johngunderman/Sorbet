@@ -1,7 +1,5 @@
 package sourceparser;
 
-import japa.parser.ast.expr.AnnotationExpr;
-import japa.parser.ast.expr.AssignExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.visitor.VoidVisitorAdapter;
 import japa.parser.ast.body.VariableDeclarator;

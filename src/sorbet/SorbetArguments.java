@@ -2,9 +2,7 @@ package sorbet;
 
 import java.util.List;
 
-import com.beust.jcommander.IParameterValidator;
 import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.internal.Lists;
 
 public class SorbetArguments {

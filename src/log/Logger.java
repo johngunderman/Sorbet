@@ -1,7 +1,5 @@
 package log;
 
-import com.sun.jdi.Value;
-
 public abstract class Logger {
 
 	protected int line = 0;

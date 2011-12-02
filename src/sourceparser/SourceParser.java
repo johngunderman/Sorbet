@@ -1,14 +1,9 @@
 package sourceparser;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.TreeSet;
 
 
 import japa.parser.JavaParser;
