@@ -144,7 +144,7 @@ public class StepEventHandler implements IEventHandler {
 								}
 							} catch (AbsentInformationException e) {
 								// TODO Auto-generated catch block
-								e.printStackTrace();
+								//e.printStackTrace();
 							} catch (IncompatibleThreadStateException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();

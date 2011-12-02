@@ -184,6 +184,8 @@ public class SQLiteLogger extends Logger {
 
 			availableVars.put(var, varValuesId);
 
+			varValuesId++;
+
 
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
