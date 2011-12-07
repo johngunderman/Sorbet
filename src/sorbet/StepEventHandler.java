@@ -130,15 +130,17 @@ public class StepEventHandler {
 	private void logNewVariables(ThreadReference thread, Step lastStep,
 			Step newStep) throws AbsentInformationException {
 
-		List<String> usedVariables = sourceParser.getVariables(
-				newStep.location.sourcePath(), newStep.location.lineNumber());
-
-		if (usedVariables != null) {
-			HashSet<String> usedVarSet = new HashSet<String>(usedVariables);
-			for (String variable : usedVarSet) {
-				if (newStep.knownVariables.add(variable)) {
-					logger.logVarCreated(variable,
-							getVariableType(thread, variable));
+		if (lastStep.location != null) {
+			List<String> usedVariables = sourceParser.getVariables(
+					lastStep.location.sourcePath(), lastStep.location.lineNumber());
+	
+			if (usedVariables != null) {
+				HashSet<String> usedVarSet = new HashSet<String>(usedVariables);
+				for (String variable : usedVarSet) {
+					if (newStep.knownVariables.add(variable)) {
+						logger.logVarCreated(variable,
+								getVariableType(thread, variable));
+					}
 				}
 			}
 		}

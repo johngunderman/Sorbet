@@ -20,7 +20,7 @@ public class PrintLogger extends Logger {
 	@Override
 	public void logVarChanged(String var, String value) {
 		// TODO Auto-generated method stub
-		System.out.println("\t>>> " + var + " = " + value);
+		System.out.println("\tNew Variable Value: " + var + " = " + value);
 	}
 
 	@Override
