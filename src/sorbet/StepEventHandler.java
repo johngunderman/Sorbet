@@ -139,21 +139,27 @@ public class StepEventHandler {
 				for (String variable : usedVarSet) {
 					if (newStep.knownVariables.add(variable)) {
 						logger.logVarCreated(variable,
-								getVariableType(thread, variable));
+								getVariableType(thread, variable, newStep.location.declaringType()));
 					}
 				}
 			}
 		}
 	}
 
-	private String getVariableType(ThreadReference thread, String variable) {
+	private String getVariableType(ThreadReference thread, String variable, ReferenceType ref) {
 		String type = "UNKNOWN";
 
 		LocalVariable lv = null;
+		Field f = null;
 		try {
 			lv = thread.frame(0).visibleVariableByName(variable);
 			if (lv != null) {
 				type = lv.typeName();
+			}
+			
+			f = ref.fieldByName(variable);
+			if (f != null && type.equals("UNKNOWN")) {
+				type = f.typeName();
 			}
 		} catch (AbsentInformationException e) {
 			// TODO Auto-generated catch block
