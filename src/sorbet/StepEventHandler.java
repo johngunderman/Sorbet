@@ -138,8 +138,8 @@ public class StepEventHandler {
 				HashSet<String> usedVarSet = new HashSet<String>(usedVariables);
 				for (String variable : usedVarSet) {
 					if (newStep.knownVariables.add(variable)) {
-						logger.logVarCreated(variable,
-								getVariableType(thread, variable));
+						logger.logVarCreated(variable, getVariableType(thread, variable));
+						logger.logVarChanged(variable, getValue(thread, lastStep.location, variable));
 					}
 				}
 			}
