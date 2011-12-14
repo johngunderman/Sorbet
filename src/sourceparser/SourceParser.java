@@ -3,6 +3,7 @@ package sourceparser;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -87,5 +88,10 @@ public class SourceParser {
 		
 		Variables variables = lines.get(lineNumber);		
 		return variables;
+	}
+	
+	public HashSet<String> getDeclVars(String filePath) {
+		Lines lines = files.get(filePath);
+		return lines.declVars;
 	}
 }
