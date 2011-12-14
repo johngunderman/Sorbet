@@ -65,7 +65,7 @@ public class StepEventHandler {
 			return;
 		}
 
-		StepEvent stepEvent = (StepEvent) event;
+		StepEvent stepEvent = (StepEvent)event;
 
 		Location location = stepEvent.location();
 
@@ -176,33 +176,26 @@ public class StepEventHandler {
 
 	private String getFullVariableName(String variable, ThreadReference thread,
 			Step newStep) {
-		String name = null;
-		LocalVariable lv = null;
-		Field f = null;
 		try {
-			lv = thread.frame(0).visibleVariableByName(variable);
-			if (lv != null) {
-				name = variable;
+			LocalVariable localVariable = thread.frame(0).visibleVariableByName(variable);
+			if (localVariable != null) {
+				return variable;
 			}
 		} catch (AbsentInformationException e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
+			// No info available, move on
 		} catch (IncompatibleThreadStateException e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
+			// No info available, move on
 		}
-		
-		if (name == null) {
-			if (variable.contains("this.")) {
-				variable = variable.substring(5);
-			}
-			f = newStep.location.declaringType().fieldByName(variable);
-			if (f != null) {
-				name = newStep.location.declaringType().name() + "." + variable;
-			} else name = variable;
+
+		if (variable.contains("this.")) {
+			variable = variable.substring(5);
 		}
-		
-		return name;
+		Field field = newStep.location.declaringType().fieldByName(variable);
+		if (field != null) {
+			return newStep.location.declaringType().name() + "." + variable;
+		} else {
+			return variable;
+		}
 	}
 
 	private String getVariableType(ThreadReference thread, String variable, ReferenceType ref) {
