@@ -20,7 +20,7 @@ public class PrintLogger extends Logger {
 	@Override
 	public void logVarChanged(String var, String value) {
 		// TODO Auto-generated method stub
-		System.out.println("\tNew Variable Value: " + var + " = " + value);
+		System.out.println("\tVariable changed: " + var + " = " + value);
 	}
 
 	@Override
@@ -42,9 +42,9 @@ public class PrintLogger extends Logger {
 	}
 
 	@Override
-	public void logLines(String filePath, int lineNum) {
+	public void logLines(String filePath, String currentMethod, int lineNum) {
 		// TODO Auto-generated method stub
-		System.out.println("\nLine executed: " + filePath + ":" + lineNum);
+		System.out.println("\nLine executed: " + filePath + ":" + lineNum + " - " + currentMethod);
 	}
 
 

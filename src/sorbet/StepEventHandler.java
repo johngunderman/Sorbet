@@ -261,6 +261,7 @@ public class StepEventHandler {
 
 	private String getValue(ThreadReference thread, Location location,
 			String variableName) {
+		
 		StackFrame stackFrame;
 		try {
 			stackFrame = thread.frame(0);
@@ -323,7 +324,7 @@ public class StepEventHandler {
 	}
 
 	private void logLocation(Step newStep) throws AbsentInformationException {
-		logger.logLines(newStep.location.sourcePath(),
+		logger.logLines(newStep.location.sourcePath(), newStep.location.method().name(),
 				newStep.location.lineNumber());
 	}
 

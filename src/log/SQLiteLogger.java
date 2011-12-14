@@ -246,7 +246,7 @@ public class SQLiteLogger extends Logger {
 	}
 
 	@Override
-	public void logLines(String filePath, int lineNum) {
+	public void logLines(String filePath, String currentMethod, int lineNum) {
 		
 		try {
 			PreparedStatement prep = conn.prepareStatement(linesInsert);
