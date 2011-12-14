@@ -138,9 +138,9 @@ public class StepEventHandler {
 				for (String variable : usedVariables) {
 					String fullVarName = getFullVarName(variable, thread, newStep);
 					if (newStep.knownVariables.add(fullVarName)) {
-						logger.logVarCreated(variable,
+						logger.logVarCreated(fullVarName,
 								getVariableType(thread, fullVarName, newStep.location.declaringType()));
-						logger.logVarChanged(variable, getValue(thread, lastStep.location, fullVarName));
+						logger.logVarChanged(fullVarName, getValue(thread, lastStep.location, fullVarName));
 					}
 				}
 			}
@@ -157,12 +157,6 @@ public class StepEventHandler {
 			if (lv != null) {
 				name = variable;
 			}
-			else {
-				f = newStep.location.declaringType().fieldByName(variable);
-				if (f != null) {
-					name = newStep.location.declaringType().name() + "." + variable;
-				}
-			}
 		} catch (AbsentInformationException e) {
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
@@ -170,6 +164,14 @@ public class StepEventHandler {
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
 		}
+		
+		if (name == null) {
+			f = newStep.location.declaringType().fieldByName(variable);
+			if (f != null) {
+				name = newStep.location.declaringType().name() + "." + variable;
+			} else name = variable;
+		}
+		
 		return name;
 	}
 
@@ -184,7 +186,14 @@ public class StepEventHandler {
 				type = lv.typeName();
 			}
 			
-			f = ref.fieldByName(variable);
+			String varName = variable;
+			// this may need to get fixed up a bit later, but it should work
+			// takes care of our fully qualified fields.
+			if (variable.indexOf('.') != -1) {
+				varName = variable.substring(variable.lastIndexOf('.') + 1);
+			}
+			
+			f = ref.fieldByName(varName);
 			if (f != null && type.equals("UNKNOWN")) {
 				type = f.typeName();
 			}
@@ -204,12 +213,13 @@ public class StepEventHandler {
 		
 		for (String lastVariable : lastStep.variableValues.keySet()) {
 
-			String lastValue = lastStep.variableValues.get(lastVariable);
+			String var = getFullVarName(lastVariable, thread, newStep);
+			String lastValue = lastStep.variableValues.get(var);
 			String currentValue = getValue(thread, newStep.location,
-					lastVariable);
+					var);
 
 			if (lastValue.equals(currentValue) == false) {
-				logger.logVarChanged(lastVariable, currentValue);
+				logger.logVarChanged(var, currentValue);
 			}
 		}
 	}
@@ -240,20 +250,27 @@ public class StepEventHandler {
 			return stackFrame.getValue(variable).toString();
 		} else {
 			// The variable was not on the stack
+			
+			String varName = variableName;
+			// this may need to get fixed up a bit later, but it should work
+			// takes care of our fully qualified fields.
+			if (variableName.indexOf('.') != -1) {
+				varName = variableName.substring(variableName.lastIndexOf('.') + 1);
+			}
 
 			Value value = null;
 
 			ObjectReference objectReference = stackFrame.thisObject();
 			if (objectReference != null) {
 				ReferenceType referenceType = objectReference.referenceType();
-				Field field = referenceType.fieldByName(variableName);
+				Field field = referenceType.fieldByName(varName);
 				value = objectReference.getValue(field);
 			}
 
 			// handle static fields
 			if (value == null) {
 				ReferenceType referenceType = location.declaringType();
-				Field field = referenceType.fieldByName(variableName);
+				Field field = referenceType.fieldByName(varName);
 				if (field != null) {
 					value = referenceType.getValue(field);
 				}
@@ -281,6 +298,7 @@ public class StepEventHandler {
 
 		if (usedVariables != null) {
 			for (String variable : usedVariables) {
+				variable = getFullVarName(variable, thread, newStep);
 				if (lastStep.knownVariables.contains(variable)) {
 					String value = getValue(thread, newStep.location, variable);
 	
