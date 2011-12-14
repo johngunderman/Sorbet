@@ -261,12 +261,7 @@ public class StepEventHandler {
 
 	private String getValue(ThreadReference thread, Location location,
 			String variableName) {
-		try {
-			System.out.println("getting value for " + variableName + " on " + location.sourceName() + ":" + location.lineNumber());
-		} catch (AbsentInformationException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
+		
 		StackFrame stackFrame;
 		try {
 			stackFrame = thread.frame(0);
@@ -327,7 +322,7 @@ public class StepEventHandler {
 	}
 
 	private void logLocation(Step newStep) throws AbsentInformationException {
-		logger.logLines(newStep.location.sourcePath(), newStep.location.method(),
+		logger.logLines(newStep.location.sourcePath(), newStep.location.method().name(),
 				newStep.location.lineNumber());
 	}
 
