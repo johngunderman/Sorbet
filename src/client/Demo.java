@@ -22,7 +22,12 @@ public class Demo {
 		int x = 3;
 		
 		Test test = new Test();
-		x = test.getTest();
+		//x = test.getTest();
+		
+		System.out.println("test" + x);
+		
+		int System = 3 + 2;
+		x = System++;
 	}
 	
 	public static int test() {

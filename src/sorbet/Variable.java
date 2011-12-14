@@ -26,13 +26,11 @@ public class Variable {
 	
 	@Override
 	public int hashCode() {
-		//System.out.println("CCCCCCCCCCCCCCCCCCCCCCCCCCCC");
 		return toString().hashCode();
 	}
 	
 	@Override
 	public boolean equals(Object o) {
-		//System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 		if (o instanceof Variable) {
 			Variable v = (Variable)o;
 			return this.isLocal == v.isLocal &&

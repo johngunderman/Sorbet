@@ -71,7 +71,7 @@ public class StepEventHandler {
 
 		for (ThreadReference thread : vm.allThreads()) {
 			String threadName = thread.name();
-			
+
 			if (threadName.equals("main")) {
 				int stackDepth;
 				try {
@@ -81,12 +81,12 @@ public class StepEventHandler {
 
 					continue;
 				}
-				
+
 				if (threads.containsKey(threadName) == false) {
 					threads.put(threadName, new StepStack());
 				}
 				StepStack stepStack = threads.get(threadName);
-				
+
 				if (stepStack.size() < stackDepth) {
 					// Stack has grown so make a new Step
 
@@ -96,33 +96,33 @@ public class StepEventHandler {
 
 					stepStack.pop();
 				}
-				
+
 				Steps steps = stepStack.peek();
-				
+
 				if (steps != null) {
 
 					Step newStep = new Step();
 					newStep.location = location;
-					
+
 					try {
 						if (steps.empty() == false) {
 							Step lastStep = steps.pop();
 							newStep.declaredVariables = lastStep.declaredVariables;
-							
+
 							if (sameLocation(newStep.location, lastStep.location) == false) {
 								// Log step location
 								logLocation(lastStep);
-								
+
 								// Log variable changes
 								logVariables(thread, lastStep, newStep);
 							} else {
 								newStep.usedVariables = lastStep.usedVariables;
 							}
 						}
-						
+
 						// Save used variable values for comparison in the next step
 						saveUsedVariables(thread, newStep);
-						
+
 					} catch (AbsentInformationException e) {
 						// No information available, move on
 					}
@@ -164,9 +164,10 @@ public class StepEventHandler {
 		}
 		
 		for (Variable justDeclaredVariable : justDeclaredVariables) {
+
 			lastStep.declaredVariables.add(justDeclaredVariable);
 			newStep.declaredVariables.add(justDeclaredVariable);
-			
+
 			// Log new variable
 			logger.logVarCreated(justDeclaredVariable.toString(),
 					getVariableType(thread, justDeclaredVariable.getFullName(), lastStep.location.declaringType()));
@@ -235,14 +236,14 @@ public class StepEventHandler {
 			if (lv != null) {
 				type = lv.typeName();
 			}
-			
+
 			String varName = variable;
 			// this may need to get fixed up a bit later, but it should work
 			// takes care of our fully qualified fields.
 			if (variable.indexOf('.') != -1) {
 				varName = variable.substring(variable.lastIndexOf('.') + 1);
 			}
-			
+
 			f = ref.fieldByName(varName);
 			if (f != null && type.equals("UNKNOWN")) {
 				type = f.typeName();
@@ -284,7 +285,7 @@ public class StepEventHandler {
 			return stackFrame.getValue(variable).toString();
 		} else {
 			// The variable was not on the stack
-			
+
 			String varName = variableName;
 			// this may need to get fixed up a bit later, but it should work
 			// takes care of our fully qualified fields.
@@ -314,7 +315,7 @@ public class StepEventHandler {
 				return value.toString();
 			} else {
 				return "null"; // TODO: This returns null for static fields
-								// outside the current class as well...
+				// outside the current class as well...
 			}
 		}
 	}
@@ -330,19 +331,24 @@ public class StepEventHandler {
 		List<String> usedVariables = sourceParser.getVariables(
 				newStep.location.sourcePath(), newStep.location.lineNumber());
 
+		HashSet<String> declVars = sourceParser.getDeclVars(newStep.location.sourcePath());
+
 		if (usedVariables != null) {
 			for (String variableName : usedVariables) {
 				Variable variable = getFullVariableName(variableName, thread, newStep); // FIXME 
 				
-				String value = getValue(thread, newStep.location, variable.getFullName());
-
-				newStep.usedVariables.put(variable, value);
+				if (declVars.contains(variableName) || variableName.indexOf('.') > -1) {
+				
+					String value = getValue(thread, newStep.location, variable.getFullName());
+	
+					newStep.usedVariables.put(variable, value);
+				}
 			}
 		}
 	}
-	
+
 	private boolean sameLocation(Location location1, Location location2) throws AbsentInformationException {
 		return location1.sourceName().equals(location2.sourceName()) &&
-			location1.lineNumber() == location2.lineNumber();
+				location1.lineNumber() == location2.lineNumber();
 	}
 }
