@@ -37,8 +37,6 @@ public class VariableVisitor<A> extends VoidVisitorAdapter<A> {
 
 	@Override
 	public void visit(VariableDeclarationExpr n, A arg) {		
-		//System.out.println("jabbajabbajabbaba: " + n.getType() + " " +  n.getVars().get(0).getId().getName());
-
 		// this may cause issues as declVars doesn't monitor when things go out of scope.
 		lines.declVars.add(n.getVars().get(0).getId().getName());
 
