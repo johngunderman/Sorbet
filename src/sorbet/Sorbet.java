@@ -48,7 +48,7 @@ public class Sorbet {
 						return;
 					} 
 					
-					stepEventHandler.handle(event);					
+					stepEventHandler.handleEvent(event);					
 				}
 					
 				eventSet.resume();
