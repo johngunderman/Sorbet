@@ -9,15 +9,23 @@ public class Demo {
 		
 		i = 3 + 6;
 		
+		i = 10;
+		
+		i++;
+		
 		String abc;
 		
 		abc = "i = " + i;
 		
 		int j = test() + i;
+		
+		int x = 3;
 	}
 	
 	public static int test() {
-		return 2;
+		int returnval = 2;
+		
+		return returnval;
 	}
 
 }
