@@ -59,7 +59,7 @@ public class StepEventHandler {
 		}
 	}
 
-	public void handle(Event event) {
+	public void handleEvent(Event event) {
 		if (event instanceof StepEvent == false) {
 			return;
 		}
