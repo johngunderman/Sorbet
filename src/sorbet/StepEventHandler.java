@@ -200,6 +200,9 @@ public class StepEventHandler {
 		}
 		
 		if (name == null) {
+			if (variable.contains("this.")) {
+				variable = variable.substring(5);
+			}
 			f = newStep.location.declaringType().fieldByName(variable);
 			if (f != null) {
 				name = newStep.location.declaringType().name() + "." + variable;
