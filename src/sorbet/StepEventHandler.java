@@ -116,7 +116,7 @@ public class StepEventHandler {
 								// Log variable changes
 								logVariables(thread, lastStep, newStep);
 							} else {
-								newStep.usedVariableValues = lastStep.usedVariableValues;
+								newStep.usedVariables = lastStep.usedVariables;
 							}
 						}
 						
@@ -138,47 +138,56 @@ public class StepEventHandler {
 
 	private void logVariables(ThreadReference thread, Step lastStep, Step newStep) throws AbsentInformationException {
 		
-		Set<String> usedVariableNames = lastStep.usedVariableValues.keySet();
+		Set<Variable> usedVariableNames = lastStep.usedVariables.keySet();
 		
-		List<String> justDeclaredVariables = new LinkedList<String>();
-		
-		for (String variableName : usedVariableNames) {
-			String fullVariableName = getFullVariableName(variableName, thread, lastStep);
-			
-			if (lastStep.declaredVariables.contains(fullVariableName) == false) {
+		List<Variable> justDeclaredVariables = new LinkedList<Variable>();
+				
+		for (Variable variable : usedVariableNames) {
+			if (lastStep.declaredVariables.contains(variable) == false) {
 				// Variable was just declared
-				justDeclaredVariables.add(fullVariableName);
+				justDeclaredVariables.add(variable);
 							
 			} else {
 				// Variable was already declared and is therefore only used
 				
-				logger.logVarUsed(fullVariableName);
+				logger.logVarUsed(variable.toString());
+				
+				String lastValue = lastStep.usedVariables.get(variable);				
+				String newValue = getValue(thread, lastStep.location, variable.getFullName());
 			
-				if (lastStep.usedVariableValues.get(fullVariableName).equals(getValue(thread, lastStep.location, fullVariableName)) == false) {
+				if (lastValue.equals(newValue) == false) {
 					// Variable changed
 					
-					logger.logVarChanged(fullVariableName, getValue(thread, lastStep.location, fullVariableName));
+					logger.logVarChanged(variable.toString(), newValue); // TODO: Fix this for SQLite logger
 				}
 			}
 		}
 		
-		for (String justDeclaredVariable : justDeclaredVariables) {
+		for (Variable justDeclaredVariable : justDeclaredVariables) {
 			lastStep.declaredVariables.add(justDeclaredVariable);
 			newStep.declaredVariables.add(justDeclaredVariable);
 			
 			// Log new variable
-			logger.logVarCreated(justDeclaredVariable,
-					getVariableType(thread, justDeclaredVariable, lastStep.location.declaringType()));
+			logger.logVarCreated(justDeclaredVariable.toString(),
+					getVariableType(thread, justDeclaredVariable.getFullName(), lastStep.location.declaringType()));
 			// Log its value
-			logger.logVarChanged(justDeclaredVariable, getValue(thread, lastStep.location, justDeclaredVariable));	
+			logger.logVarChanged(justDeclaredVariable.toString(), getValue(thread, lastStep.location, justDeclaredVariable.getFullName()));	
 		}
 	}
 
-	private String getFullVariableName(String variable, ThreadReference thread,
+	private Variable getFullVariableName(String variableName, ThreadReference thread,
 			Step newStep) {
+		
+		Variable variable = new Variable(variableName);
+		
+		// Check to see if is a local variable
 		try {
-			LocalVariable localVariable = thread.frame(0).visibleVariableByName(variable);
+			LocalVariable localVariable = thread.frame(0).visibleVariableByName(variableName);
 			if (localVariable != null) {
+				// This is a local variable, so just return the variable name
+				
+				variable.isLocal = true;
+				
 				return variable;
 			}
 		} catch (AbsentInformationException e) {
@@ -186,14 +195,32 @@ public class StepEventHandler {
 		} catch (IncompatibleThreadStateException e) {
 			// No info available, move on
 		}
-
-		if (variable.contains("this.")) {
-			variable = variable.substring(5);
+		
+		// Check to see if it is a non-local variable and get the fully qualified name
+		if (variableName.contains("this.")) {
+			// Trim off the "this" keyword
+			variableName = variableName.substring(5);
 		}
-		Field field = newStep.location.declaringType().fieldByName(variable);
+		
+		Field field = newStep.location.declaringType().fieldByName(variableName);
 		if (field != null) {
-			return newStep.location.declaringType().name() + "." + variable;
+			try {
+				ObjectReference thisObject = thread.frame(0).thisObject();
+				
+				if (thisObject != null) {
+					variable.classID = thisObject.uniqueID();
+				} else {
+					variable.isStatic = true;
+				}
+			} catch (IncompatibleThreadStateException e) {
+				// Skip
+			}
+			
+			variable.prefix = newStep.location.declaringType().name();
+
+			return variable;
 		} else {
+			variable.isLocal = true;
 			return variable;
 		}
 	}
@@ -304,12 +331,12 @@ public class StepEventHandler {
 				newStep.location.sourcePath(), newStep.location.lineNumber());
 
 		if (usedVariables != null) {
-			for (String variable : usedVariables) {
-				variable = getFullVariableName(variable, thread, newStep);
+			for (String variableName : usedVariables) {
+				Variable variable = getFullVariableName(variableName, thread, newStep); // FIXME 
 				
-				String value = getValue(thread, newStep.location, variable);
+				String value = getValue(thread, newStep.location, variable.getFullName());
 
-				newStep.usedVariableValues.put(variable, value);
+				newStep.usedVariables.put(variable, value);
 			}
 		}
 	}

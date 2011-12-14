@@ -2,8 +2,10 @@ package client;
 
 public class Demo {
 	
+	public static int i;
+	
 	public static void main(String[] args) {
-		int i;
+		//int i;
 		
 		i = 3 + 6;
 		
@@ -18,6 +20,9 @@ public class Demo {
 		int j = test() + i;
 		
 		int x = 3;
+		
+		Test test = new Test();
+		x = test.getTest();
 	}
 	
 	public static int test() {

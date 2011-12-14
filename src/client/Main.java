@@ -38,6 +38,7 @@ public class Main {
 		double randomVariableTwo = Math.random();
 		
 		Test test = new Test();
+		Test test2 = new Test();
 		
 		System.out.println("Client program " + test.getTest());
 	}

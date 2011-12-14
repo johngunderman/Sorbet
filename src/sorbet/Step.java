@@ -11,7 +11,7 @@ public class Step {
 
 	public Location location;
 
-	public Set<String> declaredVariables = new HashSet<String>();
+	public Set<Variable> declaredVariables = new HashSet<Variable>();
 	
-	public Map<String, String> usedVariableValues = new HashMap<String, String>(); 
+	public Map<Variable, String> usedVariables = new HashMap<Variable, String>(); 
 }
