@@ -299,7 +299,9 @@ public class StepEventHandler {
 			if (objectReference != null) {
 				ReferenceType referenceType = objectReference.referenceType();
 				Field field = referenceType.fieldByName(varName);
-				value = objectReference.getValue(field);
+				if (field != null) {
+					value = objectReference.getValue(field);
+				}
 			}
 
 			// handle static fields
