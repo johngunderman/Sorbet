@@ -135,15 +135,42 @@ public class StepEventHandler {
 					lastStep.location.sourcePath(), lastStep.location.lineNumber());
 	
 			if (usedVariables != null) {
-				HashSet<String> usedVarSet = new HashSet<String>(usedVariables);
-				for (String variable : usedVarSet) {
-					if (newStep.knownVariables.add(variable)) {
+				for (String variable : usedVariables) {
+					String fullVarName = getFullVarName(variable, thread, newStep);
+					if (newStep.knownVariables.add(fullVarName)) {
 						logger.logVarCreated(variable,
-								getVariableType(thread, variable, newStep.location.declaringType()));
+								getVariableType(thread, fullVarName, newStep.location.declaringType()));
+						logger.logVarChanged(variable, getValue(thread, lastStep.location, fullVarName));
 					}
 				}
 			}
 		}
+	}
+
+	private String getFullVarName(String variable, ThreadReference thread,
+			Step newStep) {
+		String name = null;
+		LocalVariable lv = null;
+		Field f = null;
+		try {
+			lv = thread.frame(0).visibleVariableByName(variable);
+			if (lv != null) {
+				name = variable;
+			}
+			else {
+				f = newStep.location.declaringType().fieldByName(variable);
+				if (f != null) {
+					name = newStep.location.declaringType().name() + "." + variable;
+				}
+			}
+		} catch (AbsentInformationException e) {
+			// TODO Auto-generated catch block
+			// e.printStackTrace();
+		} catch (IncompatibleThreadStateException e) {
+			// TODO Auto-generated catch block
+			// e.printStackTrace();
+		}
+		return name;
 	}
 
 	private String getVariableType(ThreadReference thread, String variable, ReferenceType ref) {
