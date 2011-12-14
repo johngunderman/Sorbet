@@ -3,6 +3,7 @@ package client;
 public class Demo {
 	
 	public static int i;
+	public static int System;
 	
 	public static void main(String[] args) {
 		//int i;
@@ -22,12 +23,7 @@ public class Demo {
 		int x = 3;
 		
 		Test test = new Test();
-		//x = test.getTest();
-		
-		System.out.println("test" + x);
-		
-		int System = 3 + 2;
-		x = System++;
+		x = test.getTest();
 	}
 	
 	public static int test() {

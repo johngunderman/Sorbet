@@ -337,8 +337,8 @@ public class StepEventHandler {
 			for (String variableName : usedVariables) {
 				Variable variable = getFullVariableName(variableName, thread, newStep); // FIXME 
 				
-				if (declVars.contains(variableName) || variableName.indexOf('.') > -1) {
-				
+				if (declVars.contains(variableName) || variable.getFullName().indexOf('.') > -1) {
+
 					String value = getValue(thread, newStep.location, variable.getFullName());
 	
 					newStep.usedVariables.put(variable, value);
