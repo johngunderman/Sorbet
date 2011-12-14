@@ -39,7 +39,7 @@ public class TextLogger extends Logger {
 	}
 
 	@Override
-	public void logLines(String filePath, int lineNum) {
+	public void logLines(String filePath, String currentMethod, int lineNum) {
 		// TODO Auto-generated method stub
 		
 	}

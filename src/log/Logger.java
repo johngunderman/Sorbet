@@ -20,6 +20,6 @@ public abstract class Logger {
 
 	public abstract void logProgramExit(int exitCode, String exception);
 
-	public abstract void logLines(String filePath, int lineNum);
+	public abstract void logLines(String filePath, String currentMethod, int lineNum);
 		
 }
